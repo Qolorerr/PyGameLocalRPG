@@ -44,10 +44,3 @@ class Essence:
         self.damage = 0
         self.live = self.ESSENSE_DIE
         self.location = [None, None]
-
-
-A = Essence(100, 10, [1, 1], 0)
-B = Essence(1000, 1, [1, 1], 0)
-while B.live != B.ESSENSE_DIE and A.live != A.ESSENSE_DIE:
-    A.attack(B)
-    print(B.health, A.health)
