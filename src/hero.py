@@ -1,7 +1,7 @@
 import pygame
 
 
-from src.essence import Essence
+from essence import Essence
 
 
 class Hero(Essence):
