@@ -80,7 +80,7 @@ def main():
     running = True
     gameMap = Map(100, 100)
     essences.append(Hero(100, 30, (2, 3), textures[2].image, move_distance=5, attack_range=3))
-    essences.append(Being(100, 10, (5, 6), textures[1].image, 10, 10))
+    essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     abilities = []
     for i in range(4):
         abilities.append(Ability(str(i), textures[3], 1, 1, True))

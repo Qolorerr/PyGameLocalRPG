@@ -33,6 +33,7 @@ class Essence:
         if (abs(other_essence.location[0] - self.location[0]) + abs(other_essence.location[1] - self.location[1])) <= \
                 self.attack_range and self.live == self.ESSENSE_ALIVE and self is not other_essence:
             other_essence.received_damage(self, type_of_attack)
+            self.alive()
         res = other_essence.alive()
         if res == self.ESSENSE_DIE:
             return res
@@ -46,8 +47,6 @@ class Essence:
         if self.alive() == self.ESSENSE_DIE:
             self.who_killed_me = other_essence
             return self.ESSENSE_DIE
-        else:
-            raise Exception('Error in class Essence, def received_damage')
 
     # Damage action
     def response_to_damage(self, other_essence):
