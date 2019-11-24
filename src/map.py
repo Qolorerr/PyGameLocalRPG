@@ -1,4 +1,5 @@
 import pygame
+from essence import Essence
 
 
 # Load texture image
@@ -63,18 +64,21 @@ def main():
     screen = pygame.display.set_mode((800, 600))
     running = True
     gameMap = Map(100, 100)
+    essence = Essence(100, 10, [2, 3], Cell(gameMap.cell_size - 2, 1), 1)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 gameMap.get_click(pygame.mouse.get_pos())
+                essence.move(gameMap.get_cell(pygame.mouse.get_pos()))
         gameMap.render(screen)
+        essence.render(screen, gameMap)
         pygame.display.flip()
     pygame.quit()
 
 
 pygame.init()
 # List of textures
-textures = [Texture('0.jpg')]
+textures = [Texture('0.jpg'), Texture('1.png')]
 main()
