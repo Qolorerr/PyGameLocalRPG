@@ -1,16 +1,23 @@
+from pygame import image
+import map
+
 # Base class of all units and characters
 class Essence:
     def __init__(self, health: int,
                  damage: int,
                  location: tuple,
-                 texture,  # Object class Cell
+                 type: int,
+                 cell_size: int,
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
         self.health = health
         self.damage = damage
         self.location = location
-        self.texture = texture
+        oldSize = textures[type].image.get_rect().size
+        k = (cell_size - 2) / oldSize[0]
+        newSize = (int(oldSize[0] * k), int(oldSize[1] * k))
+        self.texture = pygame.transform.scale(textures[type].image, newSize)
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
         self.essence_code = essence_code
@@ -62,7 +69,7 @@ class Essence:
     def render(self, screen, map):
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
-        screen.blit(self.texture.image, (x + 1, y + 1))
+        screen.blit(self.texture, (x + 1, y + 1))
 
     def __delete__(self, instance):
         self.health = 0

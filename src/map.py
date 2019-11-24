@@ -1,5 +1,7 @@
 import pygame
 from essence import Essence
+from hero import Hero
+from being import Being
 
 
 # Load texture image
@@ -14,6 +16,16 @@ class Cell:
     def __init__(self, size, type):
         self.type = type
         self.image = pygame.transform.scale(textures[type].image, (size, size))
+        self.essence = None
+
+    def change_type(self, type):
+        self.type = type
+
+    def add_essence(self, essence: Being or Hero):
+        self.essence = essence
+
+    def delete_essence(self):
+        self.essence = None
 
 
 # Game map object
@@ -24,8 +36,9 @@ class Map:
         self.left = 0
         self.top = 0
         self.cell_size = 30
-        self.board = [[Cell(self.cell_size - 2, 0)] * width for _ in range(height)]
+        self.board = [[Cell(self.cell_size - 2, 0) for __ in range(width)] for _ in range(height)]
         self.secondColor = (71, 86, 19)
+        self.choosedCell = None
 
     # Change map settings
     def set_view(self, left, top, cell_size):
@@ -41,6 +54,14 @@ class Map:
                 x = self.left + j * self.cell_size
                 y = self.top + i * self.cell_size
                 screen.blit(self.board[i][j].image, (x + 1, y + 1))
+                essence = self.board[i][j].essence
+                if essence is None:
+                    continue
+                if essence.alive() == essence.ESSENSE_DIE:
+                    continue
+                texture = essence.texture
+                size = texture.get_rect().size
+                screen.blit(texture, (x + 1, y + 1 + self.cell_size - size[1]))
 
     # Get cell from mouse position
     def get_cell(self, pos):
@@ -52,19 +73,57 @@ class Map:
 
     # Nothing
     def on_click(self, coords):
-        pass
+        if coords is None:
+            return
+        essence = self.board[coords[1]][coords[0]].essence
+        if essence is None:
+            if self.choosedCell is None:
+                return
+            if not self.board[self.choosedCell[1]][self.choosedCell[0]].essence.can_move(coords):
+                return
+            hero = self.board[self.choosedCell[1]][self.choosedCell[0]].essence
+            self.board[self.choosedCell[1]][self.choosedCell[0]].delete_essence()
+            hero.location = [*coords]
+            self.board[coords[1]][coords[0]].add_essence(hero)
+            self.choosedCell = None
+            return
+        if self.choosedCell is None:
+            if type(essence) == Being:
+                return
+            self.choosedCell = coords
+            return
+        self.board[coords[1]][coords[0]].essence.attack(self.board[self.choosedCell[1]][self.choosedCell[0]].essence)
+        self.choosedCell = None
 
     # Mouse click processing
     def get_click(self, pos):
         cell = self.get_cell(pos)
         self.on_click(cell)
 
+    # Adding new hero
+    def add_hero(self, health: int, damage: int, location: list, moveRad: int, type=2):
+        oldSize = textures[type].image.get_rect().size
+        k = (self.cell_size - 2) / oldSize[0]
+        newSize = (int(oldSize[0] * k), int(oldSize[1] * k))
+        texture = pygame.transform.scale(textures[type].image, newSize)
+        hero = Hero(health, damage, location, moveRad, texture)
+        self.board[location[1]][location[0]].add_essence(hero)
+
+    def add_being(self, health: int, damage: int, location: list, exp: int, cost: int, type=1):
+        oldSize = textures[type].image.get_rect().size
+        k = (self.cell_size - 2) / oldSize[0]
+        newSize = (int(oldSize[0] * k), int(oldSize[1] * k))
+        texture = pygame.transform.scale(textures[type].image, newSize)
+        being = Being(health, damage, location, texture, exp, cost)
+        self.board[location[1]][location[0]].add_essence(being)
+
 
 def main():
-    screen = pygame.display.set_mode((800, 600))
+    resolution = (800, 600)
+    screen = pygame.display.set_mode(resolution)
     running = True
     gameMap = Map(100, 100)
-    essence = Essence(100, 10, [2, 3], Cell(gameMap.cell_size - 2, 1), 1)
+    essence = Essence(100, 10, [2, 3], 1, gameMap.cell_size, 1)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -80,5 +139,5 @@ def main():
 
 pygame.init()
 # List of textures
-textures = [Texture('0.jpg'), Texture('1.png')]
+textures = [Texture('grass.jpg'), Texture('being1.png'), Texture('hero1.jpg')]
 main()
