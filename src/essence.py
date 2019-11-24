@@ -1,6 +1,9 @@
+from pygame import image
+
+
 # Base class of all units and characters
 class Essence:
-    def __init__(self, health: int, damage: int, location: list, texture):
+    def __init__(self, health: int, damage: int, location: list, texture: image):
         self.health = health
         self.damage = damage
         self.location = location
