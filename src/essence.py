@@ -1,23 +1,18 @@
-from pygame import image
-import map
+import pygame
 
 # Base class of all units and characters
 class Essence:
     def __init__(self, health: int,
                  damage: int,
                  location: tuple,
-                 type: int,
-                 cell_size: int,
+                 texture: pygame.image,
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
         self.health = health
         self.damage = damage
         self.location = location
-        oldSize = textures[type].image.get_rect().size
-        k = (cell_size - 2) / oldSize[0]
-        newSize = (int(oldSize[0] * k), int(oldSize[1] * k))
-        self.texture = pygame.transform.scale(textures[type].image, newSize)
+        self.texture = texture
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
         self.essence_code = essence_code
@@ -36,7 +31,7 @@ class Essence:
         if (abs(other_essence.location[0] - self.location[0]) + abs(other_essence.location[1] - self.location[1])) <= \
                 self.attack_range:
             other_essence.received_damage(self, type_of_attack)
-        return self.alive()
+        return other_essence.alive()
 
     # Handling what we do when we take damage
     def received_damage(self, other_essence, type_of_attack):
