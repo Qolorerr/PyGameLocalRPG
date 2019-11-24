@@ -17,7 +17,7 @@ class Texture:
 
 # Game map object
 class Map:
-    def __init__(self, width, height):
+    def __init__(self, width, height, textures):
         self.width = width
         self.height = height
         self.left = 0
@@ -50,58 +50,3 @@ class Map:
             return None
         return (x, y)
 
-    # Attacks and moves
-    def on_click(self, coords):
-        global essences
-        for i in range(len(essences)):
-            if essences[i].location == coords:
-                if self.choosedHero is None:
-                    if type(essences[i]) == Being:
-                        return
-                    self.choosedHero = i
-                else:
-                    if essences[self.choosedHero].attack(essences[i]) == essences[i].ESSENSE_DIE:
-                        essences = essences[:i] + essences[(i + 1):]
-                    self.choosedHero = None
-                return
-        if self.choosedHero is not None:
-            essences[self.choosedHero].move(coords)
-            self.choosedHero = None
-
-    # Mouse click processing
-    def get_click(self, pos):
-        cell = self.get_cell(pos)
-        self.on_click(cell)
-
-
-def main():
-    resolution = (800, 600)
-    screen = pygame.display.set_mode(resolution)
-    running = True
-    gameMap = Map(100, 100)
-    essences.append(Hero(100, 30, (2, 3), textures[2].image, move_distance=5, attack_range=3))
-    essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
-    abilities = []
-    for i in range(4):
-        abilities.append(Ability(str(i), textures[3], 1, 1, True))
-    abilityInterface = AbilityInterface(abilities, 250, 600, (255, 255, 255))
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                gameMap.get_click(pygame.mouse.get_pos())
-                abilityInterface.get_ability_on_click(pygame.mouse.get_pos())
-        gameMap.render(screen)
-        for i in essences:
-            i.render(screen, gameMap)
-        abilityInterface.render(screen)
-        pygame.display.flip()
-    pygame.quit()
-
-
-pygame.init()
-# List of textures
-textures = [Texture('grass.jpg'), Texture('being1.png'), Texture('hero1.jpg'), Texture('ability1.jpg', 75)]
-essences = []
-main()
