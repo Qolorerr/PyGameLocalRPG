@@ -1,5 +1,7 @@
 import pygame
 from essence import Essence
+from abilityInterface import Ability
+from abilityInterface import AbilityInterface
 
 
 # Load texture image
@@ -12,6 +14,7 @@ class Texture:
 # Cell object
 class Cell:
     def __init__(self, size, type):
+        self.size = size
         self.type = type
         self.image = pygame.transform.scale(textures[type].image, (size, size))
 
@@ -65,6 +68,10 @@ def main():
     running = True
     gameMap = Map(100, 100)
     essence = Essence(100, 10, [2, 3], Cell(gameMap.cell_size - 2, 1), 1)
+    abilities = list()
+    for i in range(4):
+        abilities.append(Ability(str(i), Cell(70, 2), 1, 10, True))
+    abilityInterface = AbilityInterface(tuple(abilities), 250, 600, (255, 255, 255))
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -72,13 +79,15 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 gameMap.get_click(pygame.mouse.get_pos())
                 essence.move(gameMap.get_cell(pygame.mouse.get_pos()))
+                abilityInterface.get_ability_on_click(pygame.mouse.get_pos())
         gameMap.render(screen)
         essence.render(screen, gameMap)
+        abilityInterface.render(screen)
         pygame.display.flip()
     pygame.quit()
 
 
 pygame.init()
 # List of textures
-textures = [Texture('0.jpg'), Texture('1.png')]
+textures = [Texture('0.jpg'), Texture('1.png'), Texture('ability1.jpg')]
 main()

@@ -2,7 +2,7 @@ from src.essence import Essence
 
 
 class Being(Essence):
-    def __init__(self, health: int, damage: int, location: list, texture, exp: int, cost: int):
+    def __init__(self, health: int, damage: int, location: tuple, texture, exp: int, cost: int):
         super().__init__(health, damage, location, texture)
         self.given_experience = exp
         self.given_gold = cost

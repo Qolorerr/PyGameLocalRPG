@@ -2,7 +2,7 @@
 class Essence:
     def __init__(self, health: int,
                  damage: int,
-                 location: tuple,
+                 location: list,
                  texture,  # Object class Cell
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
@@ -16,6 +16,7 @@ class Essence:
         self.essence_code = essence_code
         self.attack_range = attack_range
         self.move_distance = move_distance
+        self.who_killed_me = None
 
     # Initialize constants for better code readability
     def init_constant(self):
@@ -27,9 +28,12 @@ class Essence:
     # launches the consequences of an attack and returns a state essence: ALIVE or DIE
     def attack(self, other_essence, type_of_attack=3):  # 3 it is MAIN_ATTACK
         if (abs(other_essence.location[0] - self.location[0]) + abs(other_essence.location[1] - self.location[1])) <= \
-                self.attack_range:
+                self.attack_range and self.live == self.ESSENSE_ALIVE:
             other_essence.received_damage(self, type_of_attack)
-        return self.alive()
+        result = self.alive()
+        if result == self.ESSENSE_DIE:
+            self.who_killed_me = other_essence
+        return result
 
     # Handling what we do when we take damage
     def received_damage(self, other_essence, type_of_attack):
@@ -37,7 +41,11 @@ class Essence:
         if type_of_attack == self.MAIN_ATTACK and self.alive() == self.ESSENSE_ALIVE:
             self.response_to_damage(other_essence)
             return self.ESSENSE_ALIVE
-        return self.ESSENSE_DIE
+        if self.alive() == self.ESSENSE_DIE:
+            self.who_killed_me = other_essence
+            return self.ESSENSE_DIE
+        else:
+            raise Exception('Error in class Essence, def received_damage')
 
     # Damage action
     def response_to_damage(self, other_essence):
