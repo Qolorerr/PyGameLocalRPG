@@ -1,31 +1,24 @@
 import pygame
+
+from general import textures
 from hero import Hero
 from being import Being
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 
 
-# Load texture image
-class Texture:
-    def __init__(self, name, cell_size=28):
-        imageLink = "../res/textures/" + name
-        self.image = pygame.image.load(imageLink)
-        oldSize = self.image.get_rect().size
-        k = (cell_size - 2) / oldSize[0]
-        self.size = (int(oldSize[0] * k), int(oldSize[1] * k))
-        self.image = pygame.transform.scale(self.image, self.size)
-
 # Game map object
 class Map:
-    def __init__(self, width, height, textures):
+    def __init__(self, width, height, choosedHero):
         self.width = width
         self.height = height
         self.left = 0
         self.top = 0
-        self.cell_size = textures[0].image.get_rect().size[0] + 2
+        self.indent = 1
+        self.cell_size = textures[0].image.get_rect().size[0] + 2 * self.indent
         self.board = [[textures[0].image for __ in range(width)] for _ in range(height)]
         self.secondColor = (71, 86, 19)
-        self.choosedHero = None
+        self.choosedHero = choosedHero
 
     # Change map settings
     def set_view(self, left, top, cell_size):
@@ -40,7 +33,7 @@ class Map:
             for j in range(self.width):
                 x = self.left + j * self.cell_size
                 y = self.top + i * self.cell_size
-                screen.blit(self.board[i][j], (x + 1, y + 1))
+                screen.blit(self.board[i][j], (x + self.indent, y + self.indent))
 
     # Get cell from mouse position
     def get_cell(self, pos):

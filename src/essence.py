@@ -71,7 +71,7 @@ class Essence:
     def render(self, screen, map):
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
-        screen.blit(self.texture, (x + 1, y + 1))
+        screen.blit(self.texture, (x + map.indent, y + map.indent))
 
     def __delete__(self, instance):
         self.health = 0
