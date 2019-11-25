@@ -5,7 +5,7 @@ import pygame
 class Essence:
     def __init__(self, health: int,
                  damage: int,
-                 location: list,
+                 location: tuple,
                  texture: pygame.image,
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
@@ -60,9 +60,8 @@ class Essence:
         return self.ESSENSE_DIE
 
     # Change location essence
-    def move(self, new_location):
-        if (abs(new_location[0] - self.location[0]) + abs(new_location[1] - self.location[1]) <= self.move_distance and
-                new_location != self.location):
+    def move(self, new_location, map):
+        if map.width > new_location[0] >= 0 and map.height > new_location[1] >= 0:
             self.location = new_location
             return True
         return False

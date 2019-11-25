@@ -10,15 +10,14 @@ from abilityInterface import AbilityInterface
 
 def on_click(gameMap: Map, coords):
     for i in range(len(essences)):
-        if essences[i].location == coords:
+        if essences[i].location == coords and essences[gameMap.choosedHero].attack_mode:
             if essences[gameMap.choosedHero].attack(essences[i]) == essences[i].ESSENSE_DIE:
                 del(essences[i])
             elif essences[gameMap.choosedHero].alive() == essences[gameMap.choosedHero].ESSENSE_DIE:
                 del(essences[gameMap.choosedHero])
-            return
-    essences[gameMap.choosedHero].move(coords)
 
-    # Mouse click processing
+
+# Mouse click processing
 def get_click(gameMap: Map, pos):
     cell = gameMap.get_cell(pos)
     on_click(gameMap, cell)
@@ -40,6 +39,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                essences[gameMap.choosedHero].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 get_click(gameMap, pygame.mouse.get_pos())
                 abilityInterface.get_ability_on_click(pygame.mouse.get_pos())
@@ -49,6 +50,8 @@ def main():
                 continue
             essences[i].render(screen, gameMap)
         essences[mainHeroID].render(screen, gameMap)
+        if essences[mainHeroID].attack_mode:
+            essences[mainHeroID].render_can_attack(screen, gameMap)
         abilityInterface.render(screen)
         pygame.display.flip()
     pygame.quit()

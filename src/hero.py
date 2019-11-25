@@ -16,8 +16,25 @@ class Hero(Essence):
         super().__init__(health, damage, location, texture, essence_code, attack_range, move_distance)
         self.mainHero = mainHero
         self.ablities = dict()
+        self.attack_mode = False
 
-    def render(self, screen, map):
+    def get_event(self, keydown_unicode, gameMap, screen):
+        if keydown_unicode == 'w':
+            new_location = (self.location[0], self.location[1] - 1)
+            self.move(new_location, gameMap)
+        elif keydown_unicode == 's':
+            new_location = (self.location[0], self.location[1] + 1)
+            self.move(new_location, gameMap)
+        elif keydown_unicode == 'a':
+            new_location = (self.location[0] - 1, self.location[1])
+            self.move(new_location, gameMap)
+        elif keydown_unicode == 'd':
+            new_location = (self.location[0] + 1, self.location[1])
+            self.move(new_location, gameMap)
+        elif keydown_unicode == 'q':
+            self.attack_mode = not self.attack_mode
+
+    def render_move_zone(self, screen, map):
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
         if self.mainHero:
@@ -29,12 +46,17 @@ class Hero(Essence):
                     x = map.left + (self.location[0] + i) * map.cell_size - map.indent
                     y = map.top + (self.location[1] + j) * map.cell_size - map.indent
                     screen.blit(textures[5].image, (x, y))
-            for i in essences:
-                if i == self:
-                    continue
-                x, y = i.location
-                if abs(x - self.location[0]) + abs(y - self.location[1]) <= self.attack_range:
-                    x = map.left + x * map.cell_size - map.indent
-                    y = map.top + y * map.cell_size - map.indent
-                    screen.blit(textures[4].image, (x, y))
+
+    def render_can_attack(self, screen, map):
+        for i in essences:
+            if i == self:
+                continue
+            x, y = i.location
+            if abs(x - self.location[0]) + abs(y - self.location[1]) <= self.attack_range:
+                x = map.left + x * map.cell_size - map.indent
+                y = map.top + y * map.cell_size - map.indent
+                screen.blit(textures[4].image, (x, y))
+
+    def render(self, screen, map):
+        self.render_move_zone(screen, map)
         super().render(screen, map)
