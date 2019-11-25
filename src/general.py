@@ -21,3 +21,5 @@ textures = [Texture('grass.jpg'),
             Texture('moveZone.png', 30)]
 
 essences = []
+
+camera = []

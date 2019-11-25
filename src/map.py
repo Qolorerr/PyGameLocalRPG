@@ -1,6 +1,6 @@
 import pygame
 
-from general import textures
+from general import textures, camera
 from hero import Hero
 from being import Being
 from abilityInterface import Ability
@@ -33,7 +33,7 @@ class Map:
             for j in range(self.width):
                 x = self.left + j * self.cell_size
                 y = self.top + i * self.cell_size
-                screen.blit(self.board[i][j], (x + self.indent, y + self.indent))
+                screen.blit(self.board[i][j], (x + self.indent + camera[0], y + self.indent + camera[1]))
 
     # Get cell from mouse position
     def get_cell(self, pos):

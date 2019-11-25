@@ -1,4 +1,5 @@
 import pygame
+from general import camera
 
 
 # Base class of all units and characters
@@ -7,6 +8,8 @@ class Essence:
                  damage: int,
                  location: tuple,
                  texture: pygame.image,
+                 exp: int,
+                 gold: int,
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
@@ -14,6 +17,8 @@ class Essence:
         self.damage = damage
         self.location = location
         self.texture = texture
+        self.exp = exp
+        self.gold = gold
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
         self.essence_code = essence_code
@@ -52,6 +57,11 @@ class Essence:
     def response_to_damage(self, other_essence):
         self.attack(other_essence, self.RESPONSE_TO_ATTACK)
 
+    def give_reward(self, other_essence):
+        if self.live == self.ESSENSE_DIE:
+            # Hero get exp and gold when being die
+            pass
+
     def alive(self):
         if self.health > 0:
             self.live = self.ESSENSE_ALIVE
@@ -70,7 +80,7 @@ class Essence:
     def render(self, screen, map):
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
-        screen.blit(self.texture, (x + map.indent, y + map.indent))
+        screen.blit(self.texture, (x + map.indent + camera[0], y + map.indent + camera[1]))
 
     def __delete__(self, instance):
         self.health = 0
