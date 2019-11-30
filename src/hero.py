@@ -21,28 +21,28 @@ class Hero(Essence):
     def get_event(self, keydown_unicode, gameMap, screen):
         if keydown_unicode == 'w':
             new_location = (self.location[0], self.location[1] - 1)
-            self.move(new_location, gameMap)
-            camera.append(camera[1] + (gameMap.cell_size + gameMap.indent))
-            del(camera[1])
+            if self.move(new_location, gameMap):
+                camera.append(camera[1] + (gameMap.cell_size))
+                del(camera[1])
         elif keydown_unicode == 's':
             new_location = (self.location[0], self.location[1] + 1)
-            self.move(new_location, gameMap)
-            camera.append(camera[1] - (gameMap.cell_size + gameMap.indent))
-            del (camera[1])
+            if self.move(new_location, gameMap):
+                camera.append(camera[1] - (gameMap.cell_size))
+                del (camera[1])
         elif keydown_unicode == 'a':
             new_location = (self.location[0] - 1, self.location[1])
-            self.move(new_location, gameMap)
-            camera.append(camera[0] + (gameMap.cell_size + gameMap.indent))
-            camera.append(camera[1])
-            del(camera[0])
-            del(camera[0])
+            if self.move(new_location, gameMap):
+                camera.append(camera[0] + (gameMap.cell_size))
+                camera.append(camera[1])
+                del(camera[0])
+                del(camera[0])
         elif keydown_unicode == 'd':
             new_location = (self.location[0] + 1, self.location[1])
-            self.move(new_location, gameMap)
-            camera.append(camera[0] - (gameMap.cell_size + gameMap.indent))
-            camera.append(camera[1])
-            del (camera[0])
-            del (camera[0])
+            if self.move(new_location, gameMap):
+                camera.append(camera[0] - (gameMap.cell_size))
+                camera.append(camera[1])
+                del (camera[0])
+                del (camera[0])
         elif keydown_unicode == 'q':
             self.attack_mode = not self.attack_mode
 

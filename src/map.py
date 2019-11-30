@@ -1,10 +1,12 @@
 import pygame
+import random
 
 from general import textures, camera
 from hero import Hero
 from being import Being
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
+
 
 
 # Game map object
@@ -16,11 +18,14 @@ class Map:
         self.top = 0
         self.indent = 1
         self.cell_size = textures[0].image.get_rect().size[0] + 2 * self.indent
-        self.board = [[textures[0].image for __ in range(width)] for _ in range(height)]
+        self.generate_map()
         self.secondColor = (71, 86, 19)
         self.choosedHero = choosedHero
 
     # Change map settings
+    def generate_map(self):
+        self.board = [[textures[random.choice([0, 0, 0, 6])].image for __ in range(self.width)] for _ in range(self.height)]
+
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top

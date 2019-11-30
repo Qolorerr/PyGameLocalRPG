@@ -28,12 +28,14 @@ def main():
     screen = pygame.display.set_mode(resolution)
     running = True
     mainHeroID = 0
-    gameMap = Map(100, 100, mainHeroID)
+    gameMap = Map(10, 10, mainHeroID)
     essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 3, True))
     essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     infoObj = pygame.display.Info()
-    cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
-    cameraY = -gameMap.top - essences[mainHeroID].location[1] * (gameMap.cell_size + gameMap.indent) + (infoObj.current_h - (gameMap.cell_size + gameMap.indent)) // 2
+    cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
+              (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
+    cameraY = -gameMap.top - essences[mainHeroID].location[1] * (gameMap.cell_size + gameMap.indent) + \
+              (infoObj.current_h - (gameMap.cell_size + gameMap.indent)) // 2
     camera.append(cameraX)
     camera.append(cameraY)
     abilities = []

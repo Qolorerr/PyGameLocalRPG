@@ -1,5 +1,5 @@
 import pygame
-from general import camera
+from general import camera, essences
 
 
 # Base class of all units and characters
@@ -71,7 +71,9 @@ class Essence:
 
     # Change location essence
     def move(self, new_location, map):
-        if map.width > new_location[0] >= 0 and map.height > new_location[1] >= 0:
+        loc_other_essences = [i.location for i in essences]
+        if map.width > new_location[0] >= 0 and map.height > new_location[1] >= 0 and \
+                new_location not in loc_other_essences:
             self.location = new_location
             return True
         return False
