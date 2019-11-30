@@ -8,6 +8,8 @@ class Ability:
                  ability_code: int,
                  max_lvl: int,
                  active: bool,
+                 cool_down: int,
+                 action_time: int,
                  **kwargs: dict):  # Qualities of ability, for example: damage 10, healing 100 or others
         self.name = name
         self.texture = texture
@@ -15,6 +17,10 @@ class Ability:
         self.ability_lvl = 1
         self.max_lvl = max_lvl
         self.active = active
+        self.cool_down = cool_down
+        self.cd_time = 0
+        self.action_time = action_time
+        self.at_time = 0
         self.qualities = kwargs
         self.init_constant()
 

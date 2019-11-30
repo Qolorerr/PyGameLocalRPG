@@ -45,7 +45,6 @@ class Essence:
 
     # Handling what we do when we take damage
     def received_damage(self, other_essence, type_of_attack):
-        self.health -= other_essence.damage
         if type_of_attack == self.MAIN_ATTACK and self.alive() == self.ESSENSE_ALIVE:
             self.response_to_damage(other_essence)
             return self.ESSENSE_ALIVE

@@ -29,7 +29,11 @@ def main():
     running = True
     mainHeroID = 0
     gameMap = Map(10, 10, mainHeroID)
-    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 5, True))
+    abilities = []
+    for i in range(4):
+        abilities.append(Ability(str(i), textures[3], 1, 1, True, 5, 5, damage=10, healing=10, shield=10))
+    abilityInterface = AbilityInterface(abilities, 250, 600, (255, 255, 255))
+    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 10, True))
     essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     infoObj = pygame.display.Info()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
@@ -38,10 +42,6 @@ def main():
               (infoObj.current_h - (gameMap.cell_size + gameMap.indent)) // 2
     camera.append(cameraX)
     camera.append(cameraY)
-    abilities = []
-    for i in range(4):
-        abilities.append(Ability(str(i), textures[3], 1, 1, True))
-    abilityInterface = AbilityInterface(abilities, 250, 600, (255, 255, 255))
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -50,7 +50,7 @@ def main():
                 essences[gameMap.choosedHero].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 get_click(gameMap, pygame.mouse.get_pos())
-                abilityInterface.get_ability_on_click(pygame.mouse.get_pos())
+                essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
         gameMap.render(screen)
         for i in range(len(essences)):
             if i == mainHeroID:

@@ -15,7 +15,7 @@ class Hero(Essence):
                  mainHero: bool = False):
         super().__init__(health, damage, location, texture, 0, 0, essence_code, attack_range, move_distance)
         self.mainHero = mainHero
-        self.ablities = dict()
+        self.shield = 0
         self.attack_mode = False
         self.steps = move_distance
 
@@ -26,16 +26,36 @@ class Hero(Essence):
         return True
 
     def attack(self, other_essence, type_of_attack=3):
+        print(self.health, self.damage, self.shield)
         if self.steps > 0:
             res = super().attack(other_essence, type_of_attack)
             self.do_step()
             return res
+
+    def received_damage(self, other_essence, type_of_attack):
+        if self.shield > 0:
+            self.shield = max(0, self.shield - other_essence.damage)
+        else:
+            self.health -= other_essence.damage
+        super().received_damage(other_essence, type_of_attack)
 
     def move(self, new_location, map):
         if self.steps > 0:
             res = super().move(new_location, map)
             self.do_step()
             return res
+
+    def use_ability(self, ability):
+        if ability is None or ability.cd_time > 0:
+            return False
+        if ability.at_time > 0:
+            return True
+        if 'damage' in ability.qualities:
+            self.damage += ability.qualities['damage']
+        if 'healing' in ability.qualities:
+            self.health += ability.qualities['healing']
+        if 'shield' in ability.qualities:
+            self.shield = ability.qualities['shield']
 
     def get_event(self, keydown_unicode, gameMap, screen):
         if keydown_unicode in ['w', 'ц']:
@@ -76,7 +96,7 @@ class Hero(Essence):
                         continue
                     x = map.left + (self.location[0] + i) * map.cell_size - map.indent
                     y = map.top + (self.location[1] + j) * map.cell_size - map.indent
-                    if x >= -1 and y >= -1:
+                    if -1 <= x < map.left + (map.width - 1) * map.cell_size and -1 <= y < map.top + (map.height - 1) * map.cell_size:
                         screen.blit(textures[5].image, (x + camera[0], y + camera[1]))
 
     def render_can_attack(self, screen, map):
