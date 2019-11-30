@@ -29,7 +29,7 @@ def main():
     running = True
     mainHeroID = 0
     gameMap = Map(10, 10, mainHeroID)
-    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 3, True))
+    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 5, True))
     essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     infoObj = pygame.display.Info()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \

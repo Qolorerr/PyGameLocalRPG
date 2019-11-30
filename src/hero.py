@@ -27,13 +27,15 @@ class Hero(Essence):
 
     def attack(self, other_essence, type_of_attack=3):
         if self.steps > 0:
-            super().attack(other_essence, type_of_attack)
+            res = super().attack(other_essence, type_of_attack)
             self.do_step()
+            return res
 
     def move(self, new_location, map):
         if self.steps > 0:
-            super().move(new_location, map)
+            res = super().move(new_location, map)
             self.do_step()
+            return res
 
     def get_event(self, keydown_unicode, gameMap, screen):
         if keydown_unicode in ['w', 'ц']:
@@ -74,7 +76,8 @@ class Hero(Essence):
                         continue
                     x = map.left + (self.location[0] + i) * map.cell_size - map.indent
                     y = map.top + (self.location[1] + j) * map.cell_size - map.indent
-                    screen.blit(textures[5].image, (x + camera[0], y + camera[1]))
+                    if x >= -1 and y >= -1:
+                        screen.blit(textures[5].image, (x + camera[0], y + camera[1]))
 
     def render_can_attack(self, screen, map):
         for i in essences:
