@@ -43,14 +43,14 @@ class Ability:
 # Interface all abilities of hero
 class AbilityInterface:
     def __init__(self, abilities: list,  # len tuple needs = 4
-                 left: int,
-                 window_height,
+                 window_width: int,
+                 window_height: int,
                  color):
         self.abilities = abilities
-        self.left = left
         self.ability_size = abilities[0].texture.size[0]
         self.color = color
         self.indent = 3
+        self.left = (window_width - len(abilities) * self.ability_size - (len(abilities) + 1) * self.indent) // 2
         self.window_height = window_height
         self.width = 4
         self.height = 1

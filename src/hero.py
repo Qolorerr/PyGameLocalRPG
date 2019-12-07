@@ -14,10 +14,13 @@ class Hero(Essence):
                  move_distance: int = 1,
                  mainHero: bool = False):
         super().__init__(health, damage, location, texture, 0, 0, essence_code, attack_range, move_distance)
+        self.maxHealth = health
         self.mainHero = mainHero
         self.shield = 0
+        self.maxShield = 1
         self.attack_mode = False
         self.steps = move_distance
+        self.move_points = move_distance
 
     def do_step(self):
         if self.steps == 0:
@@ -26,7 +29,6 @@ class Hero(Essence):
         return True
 
     def attack(self, other_essence, type_of_attack=3):
-        print(self.health, self.damage, self.shield)
         if self.steps > 0:
             res = super().attack(other_essence, type_of_attack)
             self.do_step()
@@ -54,8 +56,10 @@ class Hero(Essence):
             self.damage += ability.qualities['damage']
         if 'healing' in ability.qualities:
             self.health += ability.qualities['healing']
+            self.health = min(self.health, self.maxHealth)
         if 'shield' in ability.qualities:
-            self.shield = ability.qualities['shield']
+            self.shield = min(ability.qualities['shield'], self.maxHealth)
+            self.maxShield = self.shield
 
     def get_event(self, keydown_unicode, gameMap, screen):
         if keydown_unicode in ['w', 'ц']:

@@ -6,6 +6,7 @@ from hero import Hero
 from being import Being
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
+from userInterface import UserInterface
 
 
 def on_click(gameMap: Map, coords):
@@ -24,7 +25,7 @@ def get_click(gameMap: Map, pos):
 
 
 def main():
-    resolution = (800, 600)
+    resolution = (1000, 700)
     screen = pygame.display.set_mode(resolution)
     running = True
     mainHeroID = 0
@@ -32,7 +33,7 @@ def main():
     abilities = []
     for i in range(4):
         abilities.append(Ability(str(i), textures[3], 1, 1, True, 5, 5, damage=10, healing=10, shield=10))
-    abilityInterface = AbilityInterface(abilities, 250, 600, (255, 255, 255))
+    abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
     essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 10, True))
     essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     infoObj = pygame.display.Info()
@@ -42,6 +43,7 @@ def main():
               (infoObj.current_h - (gameMap.cell_size + gameMap.indent)) // 2
     camera.append(cameraX)
     camera.append(cameraY)
+    userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -60,6 +62,7 @@ def main():
         if essences[mainHeroID].attack_mode:
             essences[mainHeroID].render_can_attack(screen, gameMap)
         abilityInterface.render(screen)
+        userinterface.render(screen)
         pygame.display.flip()
     pygame.quit()
 
