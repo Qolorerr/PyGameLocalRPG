@@ -8,7 +8,7 @@ class Hero(Essence):
     def __init__(self, health: int,
                  damage: int,
                  location: tuple,
-                 texture: pygame.image,
+                 texture: int,
                  essence_code: int = 1,
                  attack_range: int = 1,
                  move_distance: int = 1,
@@ -18,6 +18,10 @@ class Hero(Essence):
         self.mainHero = mainHero
         self.shield = 0
         self.maxShield = 1
+        self.invisible = 0
+        self.maxExp = 100
+        self.maxGold = 100
+        self.level = 1
         self.attack_mode = False
         self.steps = move_distance
         self.move_points = move_distance
@@ -39,7 +43,17 @@ class Hero(Essence):
             self.shield = max(0, self.shield - other_essence.damage)
         else:
             self.health -= other_essence.damage
-        super().received_damage(other_essence, type_of_attack)
+        return super().received_damage(other_essence, type_of_attack)
+
+    def give_reward(self, other_essence):
+        if type(other_essence) != Hero:
+            return
+        other_essence.exp += self.exp
+        if other_essence.exp >= other_essence.maxExp:
+            other_essence.exp -= other_essence.maxExp
+            other_essence.level += 1
+            other_essence.maxExp = int(other_essence.maxExp * 1.1)
+        other_essence.gold = min(other_essence.gold + self.gold, other_essence.maxGold)
 
     def move(self, new_location, map):
         if self.steps > 0:
@@ -52,8 +66,15 @@ class Hero(Essence):
             return False
         if ability.at_time > 0:
             return True
-        if 'damage' in ability.qualities:
-            self.damage += ability.qualities['damage']
+        if 'invisibility' in ability.qualities:
+            self.invisible = 1
+        if 'splashDamage' in ability.qualities:
+            dmg, rad = ability.qualities['splashDamage']
+            for i in essences:
+                if i == self:
+                    continue
+                if abs(i.location[0] - self.location[0]) + abs(i.location[1] - self.location[1]) <= rad:
+                    i.health -= dmg
         if 'healing' in ability.qualities:
             self.health += ability.qualities['healing']
             self.health = min(self.health, self.maxHealth)
@@ -114,7 +135,11 @@ class Hero(Essence):
                 screen.blit(textures[4].image, (x + camera[0], y + camera[1]))
 
     def render(self, screen, map):
-        self.render_move_zone(screen, map)
+        if self.mainHero:
+            self.render_move_zone(screen, map)
+        elif self.invisible > 0:
+            print(1)
+            return
         super().render(screen, map)
         if self.steps > 0:
             self.render_can_attack(screen, map)

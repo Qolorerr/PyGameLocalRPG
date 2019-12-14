@@ -25,17 +25,19 @@ def get_click(gameMap: Map, pos):
 
 
 def main():
-    resolution = (1000, 700)
+    resolution = (1920, 1080)
     screen = pygame.display.set_mode(resolution)
     running = True
     mainHeroID = 0
     gameMap = Map(10, 10, mainHeroID)
     abilities = []
-    for i in range(4):
-        abilities.append(Ability(str(i), textures[3], 1, 1, True, 5, 5, damage=10, healing=10, shield=10))
+    abilities.append(Ability('0', 9, 1, 1, True, 5, 5, splashDamage=(40, 5)))
+    abilities.append(Ability('1', 10, 1, 1, True, 5, 5, healing=10))
+    abilities.append(Ability('2', 11, 1, 1, True, 5, 5, shield=20))
+    abilities.append(Ability('3', 8, 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 10, True))
-    essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
+    essences.append(Hero(100, 30, (2, 3), 2, 1, 5, 10, True))
+    essences.append(Being(100, 50, (5, 6), 1, 10, 10))
     infoObj = pygame.display.Info()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
               (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
@@ -54,6 +56,12 @@ def main():
                 get_click(gameMap, pygame.mouse.get_pos())
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
         gameMap.render(screen)
+        i = 0
+        while i < len(essences):
+            if essences[i].alive() == essences[i].ESSENSE_DIE:
+                del(essences[i])
+            else:
+                i += 1
         for i in range(len(essences)):
             if i == mainHeroID:
                 continue

@@ -17,14 +17,22 @@ class UserInterface:
         self.timeFont = pygame.font.SysFont('Agency FB', 20)
         self.scoreFont = pygame.font.SysFont('Agency FB', 20, bold=True)
 
-    def render(self, screen):
 
+    def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
+        pygame.draw.circle(screen, color, centreCoords, 50, 1)
+        text = self.scoreFont.render(str(midVal), 1, (255, 255, 255))
+        screen.blit(text, (centreCoords[0] - text.get_width() // 2, centreCoords[1] - text.get_height() // 2))
+        coeff = (currentVal / maxVal) * 2 * pi - pi / 2
+        pygame.draw.arc(screen, color, arcCoords, -coeff, pi / 2, 5)
+
+
+    def render(self, screen):
         # Show upper part of GUI
         upSize = self.upTexture.size
         coords = ((self.width - upSize[0]) // 2, 0)
         screen.blit(self.upTexture.image, coords)
         text = self.timeFont.render('00:00', 1, (255, 255, 255))
-        screen.blit(text, (self.width // 2 - 20, self.upIndent))
+        screen.blit(text, (self.width // 2 - text.get_width() // 2, self.upIndent))
         heroes = 0
         beings = 0
         for i in essences:
@@ -38,28 +46,17 @@ class UserInterface:
         screen.blit(text, (self.width // 2 + 45, self.upIndent))
 
         # Show health
-        coords = (100, self.height - 100)
-        pygame.draw.circle(screen, (255, 255, 255), coords, 50, 1)
-        text = self.scoreFont.render(str(self.essence.health), 1, (255, 255, 255))
-        screen.blit(text, (100 - text.get_width() // 2, self.height - 100 - text.get_height() // 2))
-        coords = (50, self.height - 150, 100, 100)
-        health = (self.essence.health / self.essence.maxHealth) * 2 * pi - pi / 2
-        pygame.draw.arc(screen, (255, 255, 255), coords, -health, pi / 2, 5)
-
+        self.circle_show(screen, (100, self.height - 100), (219, 77, 66), self.essence.health, self.essence.health,
+                         self.essence.maxHealth, (50, self.height - 150, 100, 100))
         # Show shield
-        coords = (225, self.height - 100)
-        pygame.draw.circle(screen, (81, 119, 179), coords, 50, 1)
-        text = self.scoreFont.render(str(self.essence.shield), 1, (255, 255, 255))
-        screen.blit(text, (225 - text.get_width() // 2, self.height - 100 - text.get_height() // 2))
-        coords = (175, self.height - 150, 100, 100)
-        shield = (self.essence.shield / self.essence.maxShield) * 2 * pi - pi / 2
-        pygame.draw.arc(screen, (81, 119, 179), coords, -shield, pi / 2, 5)
-
+        self.circle_show(screen, (225, self.height - 100), (81, 119, 179), self.essence.shield, self.essence.shield,
+                         self.essence.maxShield, (175, self.height - 150, 100, 100))
         # Show count of move points
-        coords = (self.width - 100, self.height - 100)
-        pygame.draw.circle(screen, (53, 146, 196), coords, 50, 1)
-        text = self.scoreFont.render(str(self.essence.steps), 1, (255, 255, 255))
-        screen.blit(text, (self.width - 100 - text.get_width() // 2, self.height - 112))
-        coords = (self.width - 150, self.height - 150, 100, 100)
-        steps = (self.essence.steps / self.essence.move_points) * 2 * pi - pi / 2
-        pygame.draw.arc(screen, (53, 146, 196), coords, -steps, pi / 2, 5)
+        self.circle_show(screen, (self.width - 350, self.height - 100), (53, 146, 196), self.essence.steps,
+                         self.essence.steps, self.essence.move_points, (self.width - 400, self.height - 150, 100, 100))
+        # Show exp and level
+        self.circle_show(screen, (self.width - 100, self.height - 100), (255, 255, 255), self.essence.level,
+                         self.essence.exp, self.essence.maxExp, (self.width - 150, self.height - 150, 100, 100))
+        # Show gold
+        self.circle_show(screen, (self.width - 225, self.height - 100), (255, 215, 0), self.essence.gold,
+                         self.essence.gold, self.essence.maxGold, (self.width - 275, self.height - 150, 100, 100))

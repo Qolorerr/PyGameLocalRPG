@@ -1,10 +1,11 @@
 import pygame
+from general import textures
 
 
 # Class hero's ability
 class Ability:
     def __init__(self, name: str,
-                 texture,
+                 texture: int,
                  ability_code: int,
                  max_lvl: int,
                  active: bool,
@@ -12,7 +13,7 @@ class Ability:
                  action_time: int,
                  **kwargs: dict):  # Qualities of ability, for example: damage 10, healing 100 or others
         self.name = name
-        self.texture = texture
+        self.texture = textures[texture]
         self.ability_code = ability_code
         self.ability_lvl = 1
         self.max_lvl = max_lvl

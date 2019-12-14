@@ -20,7 +20,11 @@ textures = [Texture('grass.jpg'),
             Texture('attack.png', 30),
             Texture('moveZone.png', 30),
             Texture('sand.jpg'),
-            Texture('upperUI.png', 550)]
+            Texture('upperUI.png', 550),
+            Texture('caveira.png', 75),
+            Texture('sledge.png', 75),
+            Texture('doc.png', 75),
+            Texture('montagne.png', 75)]
 
 essences = []
 
