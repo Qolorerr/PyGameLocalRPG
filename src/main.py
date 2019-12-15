@@ -7,6 +7,7 @@ from being import Being
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
+from client import Client
 
 
 def on_click(gameMap: Map, coords):
@@ -25,6 +26,11 @@ def get_click(gameMap: Map, pos):
 
 
 def main():
+    client = Client()
+    client.send_info(b'[]')
+    client.get_info()
+    client.change_essences()
+    pygame.init()
     resolution = (1000, 700)
     screen = pygame.display.set_mode(resolution)
     running = True
@@ -34,8 +40,6 @@ def main():
     for i in range(4):
         abilities.append(Ability(str(i), textures[3], 1, 1, True, 5, 5, damage=10, healing=10, shield=10))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero(100, 30, (2, 3), textures[2].image, 1, 5, 10, True))
-    essences.append(Being(100, 50, (5, 6), textures[1].image, 10, 10))
     infoObj = pygame.display.Info()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
               (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
@@ -53,6 +57,11 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 get_click(gameMap, pygame.mouse.get_pos())
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
+                client.get_info()
+                client.change_essences()
+                print("essences", essences)
         gameMap.render(screen)
         for i in range(len(essences)):
             if i == mainHeroID:
@@ -66,6 +75,4 @@ def main():
         pygame.display.flip()
     pygame.quit()
 
-
-pygame.init()
 main()

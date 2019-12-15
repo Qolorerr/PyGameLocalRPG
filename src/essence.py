@@ -1,5 +1,5 @@
 import pygame
-from general import camera, essences
+from general import camera, essences, textures
 
 
 # Base class of all units and characters
@@ -7,7 +7,7 @@ class Essence:
     def __init__(self, health: int,
                  damage: int,
                  location: tuple,
-                 texture: pygame.image,
+                 texture: int,
                  exp: int,
                  gold: int,
                  essence_code: int = 1,  # unicode
@@ -16,7 +16,8 @@ class Essence:
         self.health = health
         self.damage = damage
         self.location = location
-        self.texture = texture
+        self.texture_ind = texture
+        self.texture = textures[texture].image
         self.exp = exp
         self.gold = gold
         self.init_constant()
@@ -82,6 +83,19 @@ class Essence:
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
         screen.blit(self.texture, (x + map.indent + camera[0], y + map.indent + camera[1]))
+
+    def __bytes__(self):
+        info = {"health": self.health,
+                "damage": self.damage,
+                "location": self.location,
+                "texture": self.texture_ind,
+                "exp": self.exp,
+                "gold": self.gold,
+                "code": self.essence_code,
+                "live": self.live,
+                "who_killed": self.who_killed_me}
+        info = bytes(str(info), encoding='utf-8')
+        return info
 
     def __delete__(self, instance):
         self.health = 0

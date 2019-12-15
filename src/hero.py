@@ -8,7 +8,7 @@ class Hero(Essence):
     def __init__(self, health: int,
                  damage: int,
                  location: tuple,
-                 texture: pygame.image,
+                 texture: int,
                  essence_code: int = 1,
                  attack_range: int = 1,
                  move_distance: int = 1,
