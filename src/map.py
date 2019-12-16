@@ -11,7 +11,7 @@ from abilityInterface import AbilityInterface
 
 # Game map object
 class Map:
-    def __init__(self, width, height, choosedHero):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
         self.left = 0
@@ -20,7 +20,6 @@ class Map:
         self.cell_size = textures[0].image.get_rect().size[0] + 2 * self.indent
         self.generate_map()
         self.secondColor = (71, 86, 19)
-        self.choosedHero = choosedHero
 
     # Change map settings
     def generate_map(self):

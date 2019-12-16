@@ -9,27 +9,34 @@ from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 
 
-def on_click(gameMap: Map, coords):
+def on_click(mainHeroID, coords):
     for i in range(len(essences)):
-        if essences[i].location == coords and essences[gameMap.choosedHero].attack_mode:
-            if essences[gameMap.choosedHero].attack(essences[i]) == essences[i].ESSENSE_DIE:
+        if essences[i].location == coords and essences[mainHeroID].attack_mode:
+            if essences[mainHeroID].attack(essences[i]) == essences[i].ESSENSE_DIE:
                 del(essences[i])
-            elif essences[gameMap.choosedHero].alive() == essences[gameMap.choosedHero].ESSENSE_DIE:
-                del(essences[gameMap.choosedHero])
+            elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
+                del(essences[mainHeroID])
 
 
 # Mouse click processing
-def get_click(gameMap: Map, pos):
+def get_click(gameMap: Map, mainHeroID: int, pos):
     cell = gameMap.get_cell((pos[0] - camera[0], pos[1] - camera[1]))
-    on_click(gameMap, cell)
+    on_click(mainHeroID, cell)
+
+
+def get_mainHeroID():
+    mainHeroID = -1
+    for i in range(len(essences)):
+        if type(essences[i]) == Hero and essences[i].mainHero:
+            mainHeroID = i
+    return mainHeroID
 
 
 def main():
     resolution = (1920, 1080)
     screen = pygame.display.set_mode(resolution)
     running = True
-    mainHeroID = 0
-    gameMap = Map(10, 10, mainHeroID)
+    gameMap = Map(10, 10)
     abilities = []
     abilities.append(Ability('0', 9, 1, 1, True, 5, 5, splashDamage=(40, 5)))
     abilities.append(Ability('1', 10, 1, 1, True, 5, 5, healing=10))
@@ -39,6 +46,7 @@ def main():
     essences.append(Hero(100, 30, (2, 3), 2, 1, 5, 10, True))
     essences.append(Being(100, 50, (5, 6), 1, 10, 10))
     infoObj = pygame.display.Info()
+    mainHeroID = get_mainHeroID()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
               (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
     cameraY = -gameMap.top - essences[mainHeroID].location[1] * (gameMap.cell_size + gameMap.indent) + \
@@ -51,9 +59,9 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                essences[gameMap.choosedHero].get_event(event.unicode, gameMap, screen)
+                essences[mainHeroID].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                get_click(gameMap, pygame.mouse.get_pos())
+                get_click(gameMap, mainHeroID, pygame.mouse.get_pos())
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
         gameMap.render(screen)
         i = 0
