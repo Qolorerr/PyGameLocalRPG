@@ -9,19 +9,78 @@ from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 
 
-def on_click(mainHeroID, coords):
+showing_essence = None
+
+
+def filling_bar(screen, color, rect: tuple, value, maxValue):
+    pygame.draw.rect(screen, (0, 0, 0), rect, 1)
+    k = value / maxValue
+    indent = 1
+    rect2 = [*rect]
+    rect2[0] += indent
+    rect2[1] += indent
+    rect2[2] = int((rect2[2] - 2 * indent) * k)
+    rect2[3] -= 2 * indent
+    rect2 = tuple(rect2)
+    pygame.draw.rect(screen, color, rect2)
+    font = pygame.font.SysFont('Agency FB', 20, bold=True)
+    text = font.render(str(value), 1, (255, 255, 255))
+    screen.blit(text, (rect[0] + rect[2] // 2 - text.get_width() // 2, rect[1] + rect[3] // 2 - text.get_height() // 2))
+
+
+def show_essence_info(screen):
+    if showing_essence is None:
+        return
+    x, y, width, height, indent = 75, 200, 450, 625, 25
+    background = pygame.Surface((width, height), pygame.SRCALPHA)
+    background.fill((50, 50, 50, 100))
+    screen.blit(background, (x, y))
+    health = essences[showing_essence].health
+    damage = essences[showing_essence].damage
+    barwidth = width - indent * 2
+    barheight = (height - 5 * indent) // 4
+    filling_bar(screen, (219, 77, 66), (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage)
+    if type(essences[showing_essence]) == Hero:
+        maxHealth = essences[showing_essence].maxHealth
+        filling_bar(screen, (219, 77, 66), (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
+        shield = essences[showing_essence].shield
+        maxShield = essences[showing_essence].maxShield
+        filling_bar(screen, (81, 119, 179), (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
+        font = pygame.font.SysFont('Agency FB', 20, bold=True)
+        text = font.render('NICK ' + str(essences[showing_essence].level), 1, (255, 255, 255))
+        screen.blit(text, (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+    else:
+        filling_bar(screen, (219, 77, 66), (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, health)
+        filling_bar(screen, (81, 119, 179), (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), 0, 1)
+        font = pygame.font.SysFont('Agency FB', 40, bold=True)
+        text = font.render('BOT', 1, (255, 255, 255))
+        screen.blit(text, (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+    pygame.draw.rect(screen, (200, 0, 0), (x + width - indent, y, indent, indent))
+    pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y), (x + width, y + indent))
+    pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y + indent), (x + width, y))
+
+
+def on_click(coords):
+    global showing_essence
+    mainHeroID = get_mainHeroID()
     for i in range(len(essences)):
         if essences[i].location == coords and essences[mainHeroID].attack_mode:
             if essences[mainHeroID].attack(essences[i]) == essences[i].ESSENSE_DIE:
                 del(essences[i])
             elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
                 del(essences[mainHeroID])
+        elif essences[i].location == coords:
+            showing_essence = i
 
 
 # Mouse click processing
-def get_click(gameMap: Map, mainHeroID: int, pos):
+def get_click(gameMap: Map, pos):
+    global showing_essence
+    if 500 <= pos[0] <= 525 and 200 <= pos[1] <= 225:
+        showing_essence = None
+        return
     cell = gameMap.get_cell((pos[0] - camera[0], pos[1] - camera[1]))
-    on_click(mainHeroID, cell)
+    on_click(cell)
 
 
 def get_mainHeroID():
@@ -61,7 +120,7 @@ def main():
             if event.type == pygame.KEYDOWN:
                 essences[mainHeroID].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                get_click(gameMap, mainHeroID, pygame.mouse.get_pos())
+                get_click(gameMap, pygame.mouse.get_pos())
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
         gameMap.render(screen)
         i = 0
@@ -79,6 +138,7 @@ def main():
             essences[mainHeroID].render_can_attack(screen, gameMap)
         abilityInterface.render(screen)
         userinterface.render(screen)
+        show_essence_info(screen)
         pygame.display.flip()
     pygame.quit()
 
