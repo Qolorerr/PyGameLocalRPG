@@ -29,32 +29,45 @@ def filling_bar(screen, color, rect: tuple, value, maxValue):
 
 
 def show_essence_info(screen):
+    global showing_essence
     if showing_essence is None:
+        return
+    essence = None
+    for i in range(len(essences)):
+        if essences[i].essence_code == showing_essence:
+            essence = i
+    if essence is None:
+        showing_essence = None
         return
     x, y, width, height, indent = 75, 200, 450, 625, 25
     background = pygame.Surface((width, height), pygame.SRCALPHA)
     background.fill((50, 50, 50, 100))
     screen.blit(background, (x, y))
-    health = essences[showing_essence].health
-    damage = essences[showing_essence].damage
+    health = essences[essence].health
+    damage = essences[essence].damage
     barwidth = width - indent * 2
     barheight = (height - 5 * indent) // 4
-    filling_bar(screen, (219, 77, 66), (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage)
-    if type(essences[showing_essence]) == Hero:
-        maxHealth = essences[showing_essence].maxHealth
-        filling_bar(screen, (219, 77, 66), (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
-        shield = essences[showing_essence].shield
-        maxShield = essences[showing_essence].maxShield
-        filling_bar(screen, (81, 119, 179), (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
-        font = pygame.font.SysFont('Agency FB', 20, bold=True)
-        text = font.render('NICK ' + str(essences[showing_essence].level), 1, (255, 255, 255))
-        screen.blit(text, (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+    filling_bar(screen, (219, 77, 66),
+                (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage)
+    font = pygame.font.SysFont('Agency FB', 40, bold=True)
+    if type(essences[essence]) == Hero:
+        maxHealth = essences[essence].maxHealth
+        filling_bar(screen, (219, 77, 66),
+                    (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
+        shield = essences[essence].shield
+        maxShield = essences[essence].maxShield
+        filling_bar(screen, (81, 119, 179),
+                    (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
+        text = font.render(essences[essence].name + ' [' + str(essences[essence].level) + ']', 1, (255, 255, 255))
+        screen.blit(text,
+                    (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
     else:
-        filling_bar(screen, (219, 77, 66), (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, health)
+        filling_bar(screen, (219, 77, 66),
+                    (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, health)
         filling_bar(screen, (81, 119, 179), (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), 0, 1)
-        font = pygame.font.SysFont('Agency FB', 40, bold=True)
-        text = font.render('BOT', 1, (255, 255, 255))
-        screen.blit(text, (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+        text = font.render(essences[essence].name, 1, (255, 255, 255))
+        screen.blit(text,
+                    (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
     pygame.draw.rect(screen, (200, 0, 0), (x + width - indent, y, indent, indent))
     pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y), (x + width, y + indent))
     pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y + indent), (x + width, y))
@@ -70,7 +83,7 @@ def on_click(coords):
             elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
                 del(essences[mainHeroID])
         elif essences[i].location == coords:
-            showing_essence = i
+            showing_essence = essences[i].essence_code
 
 
 # Mouse click processing
@@ -102,8 +115,8 @@ def main():
     abilities.append(Ability('2', 11, 1, 1, True, 5, 5, shield=20))
     abilities.append(Ability('3', 8, 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero(100, 30, (2, 3), 2, 1, 5, 10, True))
-    essences.append(Being(100, 50, (5, 6), 1, 10, 10))
+    essences.append(Hero('Qolorer', 100, 30, (2, 3), 2, 1, 5, 10, True))
+    essences.append(Being('BOT', 100, 50, (5, 6), 1, 10, 10, 2))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \

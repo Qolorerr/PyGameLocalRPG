@@ -2,8 +2,17 @@ from essence import Essence
 
 
 class Being(Essence):
-    def __init__(self, health: int, damage: int, location: tuple, texture: int, exp: int, cost: int):
-        super().__init__(health, damage, location, texture, exp, cost)
+    def __init__(self, name: str,
+                 health: int,
+                 damage: int,
+                 location: tuple,
+                 texture: int,
+                 exp: int,
+                 cost: int,
+                 essence_code: int = 1,
+                 attack_range: int = 1,
+                 move_distance: int = 1):
+        super().__init__(name, health, damage, location, texture, exp, cost, essence_code, attack_range, move_distance)
 
     def received_damage(self, other_essence, type_of_attack):
         self.health -= other_essence.damage

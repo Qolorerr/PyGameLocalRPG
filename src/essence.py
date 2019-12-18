@@ -4,7 +4,8 @@ from general import camera, essences, textures
 
 # Base class of all units and characters
 class Essence:
-    def __init__(self, health: int,
+    def __init__(self, name: str,
+                 health: int,
                  damage: int,
                  location: tuple,
                  texture: int,
@@ -13,6 +14,7 @@ class Essence:
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
+        self.name = name
         self.health = health
         self.damage = damage
         self.location = location
