@@ -23,7 +23,7 @@ class Map:
 
     # Change map settings
     def generate_map(self):
-        self.board = [[textures[random.choice([0, 0, 0, 6])].image for __ in range(self.width)] for _ in range(self.height)]
+        self.board = [[textures[random.choice([0, 0, 0, 5])].image for __ in range(self.width)] for _ in range(self.height)]
 
     def set_view(self, left, top, cell_size):
         self.left = left

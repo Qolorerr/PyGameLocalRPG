@@ -124,7 +124,7 @@ class Hero(Essence):
                     x = map.left + (self.location[0] + i) * map.cell_size - map.indent
                     y = map.top + (self.location[1] + j) * map.cell_size - map.indent
                     if -1 <= x < map.left + (map.width - 1) * map.cell_size and -1 <= y < map.top + (map.height - 1) * map.cell_size:
-                        screen.blit(textures[5].image, (x + camera[0], y + camera[1]))
+                        screen.blit(textures[4].image, (x + camera[0], y + camera[1]))
 
     def render_can_attack(self, screen, map):
         for i in essences:
@@ -134,7 +134,7 @@ class Hero(Essence):
             if abs(x - self.location[0]) + abs(y - self.location[1]) <= self.attack_range:
                 x = map.left + x * map.cell_size - map.indent
                 y = map.top + y * map.cell_size - map.indent
-                screen.blit(textures[4].image, (x + camera[0], y + camera[1]))
+                screen.blit(textures[3].image, (x + camera[0], y + camera[1]))
 
     def render(self, screen, map):
         if self.mainHero:

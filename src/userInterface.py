@@ -12,7 +12,7 @@ class UserInterface:
         self.width = width
         self.height = height
         self.essence = essences[essence]
-        self.upTexture = textures[7]
+        self.upTexture = textures[6]
         self.upIndent = 5
         self.timeFont = pygame.font.SysFont('Agency FB', 20)
         self.scoreFont = pygame.font.SysFont('Agency FB', 20, bold=True)

@@ -7,6 +7,7 @@ from being import Being
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
+from menu import menu, terminate
 
 
 showing_essence = None
@@ -110,10 +111,10 @@ def main():
     running = True
     gameMap = Map(10, 10)
     abilities = []
-    abilities.append(Ability('0', 9, 1, 1, True, 5, 5, splashDamage=(40, 5)))
-    abilities.append(Ability('1', 10, 1, 1, True, 5, 5, healing=10))
-    abilities.append(Ability('2', 11, 1, 1, True, 5, 5, shield=20))
-    abilities.append(Ability('3', 8, 1, 1, True, 5, 5, invisibility=1))
+    abilities.append(Ability('0', 8, 1, 1, True, 5, 5, splashDamage=(40, 5)))
+    abilities.append(Ability('1', 9, 1, 1, True, 5, 5, healing=10))
+    abilities.append(Ability('2', 10, 1, 1, True, 5, 5, shield=20))
+    abilities.append(Ability('3', 7, 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
     essences.append(Hero('Qolorer', 100, 30, (2, 3), 2, 1, 5, 10, True))
     essences.append(Being('BOT', 100, 50, (5, 6), 1, 10, 10, 2))
@@ -126,10 +127,11 @@ def main():
     camera.append(cameraX)
     camera.append(cameraY)
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
+    menu(screen, resolution)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                terminate()
             if event.type == pygame.KEYDOWN:
                 essences[mainHeroID].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -153,7 +155,6 @@ def main():
         userinterface.render(screen)
         show_essence_info(screen)
         pygame.display.flip()
-    pygame.quit()
 
 
 pygame.init()
