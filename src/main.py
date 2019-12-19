@@ -27,7 +27,6 @@ def get_click(gameMap: Map, pos):
 
 def main():
     client = Client()
-    client.send_info(b'[]')
     client.get_info()
     client.change_essences()
     pygame.init()
@@ -74,5 +73,6 @@ def main():
         userinterface.render(screen)
         pygame.display.flip()
     pygame.quit()
+    client.disconnect()
 
 main()

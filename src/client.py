@@ -2,6 +2,7 @@
 import socket
 from general import essences
 from hero import Hero
+from being import Being
 
 
 class Client:
@@ -11,6 +12,7 @@ class Client:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))
         self.data = None
+        self.your_hero_id = int(self.sock.recv(1024).decode('utf-8'))
 
     def send_info(self, mes: bytes):
         self.sock.sendall(mes)
@@ -24,24 +26,23 @@ class Client:
                 if b.essence_code == es['code']:
                     essence_ind = i
             if essence_ind is None:
-                if essences == [] and ind == 0:
+                if es["type"] == "hero":
                     essences.append(Hero(es['health'],
                                          es['damage'],
                                          es['location'],
                                          es['texture'],
-                                         es['code'],
                                          5,
                                          10,
-                                         True))
+                                         es["code"] == self.your_hero_id))
+                    essences[-1].essence_code = es["code"]
                 else:
-                    essences.append(Hero(es['health'],
-                                         es['damage'],
-                                         es['location'],
-                                         es['texture'],
-                                         es['code'],
-                                         5,
-                                         10,
-                                         False))
+                    essences.append(Being(es['health'],
+                                          es['damage'],
+                                          es['location'],
+                                          es['texture'],
+                                          es["exp"],
+                                          es['gold']))
+                    essences[-1].essence_code = es["code"]
                 continue
             essences[essence_ind].health = es['health']
             essences[essence_ind].damage = es['damage']
@@ -56,9 +57,15 @@ class Client:
         while data == b'':
             data = self.sock.recv(1024)
         print(data)
-        data = eval(data)
-        self.data = list(map(eval, list(map(lambda x: x.decode('utf-8'), data))))
-        print(self.data)
+        data = eval(data.decode('utf-8'))
+        if data[-1] is True:
+            self.data = data[0]
+            print(self.data)
+            return True
+        else:
+            self.data = data
+            print(self.data)
+            return False
 
     def disconnect(self):
         self.sock.close()

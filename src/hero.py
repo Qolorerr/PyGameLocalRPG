@@ -7,13 +7,13 @@ from essence import Essence
 class Hero(Essence):
     def __init__(self, health: int,
                  damage: int,
-                 location: tuple,
+                 location: list,
                  texture: int,
-                 essence_code: int = 1,
                  attack_range: int = 1,
                  move_distance: int = 1,
                  mainHero: bool = False):
-        super().__init__(health, damage, location, texture, 0, 0, essence_code, attack_range, move_distance)
+        super().__init__(health, damage, location, texture, 0, 0, attack_range, move_distance)
+        self.move_distance = move_distance
         self.maxHealth = health
         self.mainHero = mainHero
         self.shield = 0
@@ -21,6 +21,9 @@ class Hero(Essence):
         self.attack_mode = False
         self.steps = move_distance
         self.move_points = move_distance
+
+    def step_update(self):
+        self.steps = self.move_distance
 
     def do_step(self):
         if self.steps == 0:
@@ -118,3 +121,9 @@ class Hero(Essence):
         super().render(screen, map)
         if self.steps > 0:
             self.render_can_attack(screen, map)
+
+    def __bytes__(self):
+        info = eval(super().__bytes__().decode('utf-8'))
+        info["type"] = "hero"
+        info = bytes(str(info), encoding='utf-8')
+        return info

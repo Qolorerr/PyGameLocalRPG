@@ -6,11 +6,10 @@ from general import camera, essences, textures
 class Essence:
     def __init__(self, health: int,
                  damage: int,
-                 location: tuple,
+                 location: list,
                  texture: int,
                  exp: int,
                  gold: int,
-                 essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
         self.health = health
@@ -22,10 +21,10 @@ class Essence:
         self.gold = gold
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
-        self.essence_code = essence_code
         self.attack_range = attack_range
         self.move_distance = move_distance
         self.who_killed_me = None
+        self.essence_code = None
 
     # Initialize constants for better code readability
     def init_constant(self):
@@ -93,7 +92,8 @@ class Essence:
                 "gold": self.gold,
                 "code": self.essence_code,
                 "live": self.live,
-                "who_killed": self.who_killed_me}
+                "who_killed": self.who_killed_me,
+                "type": 'essence'}
         info = bytes(str(info), encoding='utf-8')
         return info
 
