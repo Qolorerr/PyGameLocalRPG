@@ -108,6 +108,7 @@ def get_mainHeroID():
 def main():
     resolution = (1920, 1080)
     screen = pygame.display.set_mode(resolution)
+    nick = menu(screen, resolution)
     running = True
     gameMap = Map(10, 10)
     abilities = []
@@ -116,7 +117,7 @@ def main():
     abilities.append(Ability('2', 10, 1, 1, True, 5, 5, shield=20))
     abilities.append(Ability('3', 7, 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero('Qolorer', 100, 30, (2, 3), 2, 1, 5, 10, True))
+    essences.append(Hero(nick, 100, 30, (2, 3), 2, 1, 5, 10, True))
     essences.append(Being('BOT', 100, 50, (5, 6), 1, 10, 10, 2))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
@@ -127,7 +128,6 @@ def main():
     camera.append(cameraX)
     camera.append(cameraY)
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
-    menu(screen, resolution)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

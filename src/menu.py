@@ -1,5 +1,6 @@
 import pygame
 import sys
+from general import textures
 
 
 def terminate():
@@ -96,6 +97,7 @@ def menu(screen, resolution):
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mainmenu = not play_btn.check_clicked()
+        screen.blit(textures[11].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
         play_btn.render(screen)
         pygame.display.flip()
     screen.fill((0, 0, 0))
@@ -121,3 +123,4 @@ def menu(screen, resolution):
     print(ip_box.text)
     print(nick_box.text)
     screen.fill((0, 0, 0))
+    return nick_box.text

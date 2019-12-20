@@ -23,7 +23,8 @@ textures = [Texture('grass.jpg'),
             Texture('caveira.png', 75),
             Texture('sledge.png', 75),
             Texture('doc.png', 75),
-            Texture('montagne.png', 75)]
+            Texture('montagne.png', 75),
+            Texture('logo.png', 644)]
 
 essences = []
 
