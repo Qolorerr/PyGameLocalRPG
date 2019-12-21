@@ -97,7 +97,7 @@ def menu(screen, resolution):
                 terminate()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mainmenu = not play_btn.check_clicked()
-        screen.blit(textures[11].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
+        screen.blit(textures['Logo'].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
         play_btn.render(screen)
         pygame.display.flip()
     screen.fill((0, 0, 0))

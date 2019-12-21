@@ -26,7 +26,6 @@ class Essence:
         self.essence_code = essence_code
         self.attack_range = attack_range
         self.move_distance = move_distance
-        self.who_killed_me = None
 
     # Initialize constants for better code readability
     def init_constant(self):
@@ -80,9 +79,9 @@ class Essence:
 
     # Draw essence in location
     def render(self, screen, map):
-        x = map.left + self.location[0] * map.cell_size
-        y = map.top + self.location[1] * map.cell_size
-        screen.blit(self.texture.image, (x + map.indent + camera[0], y + map.indent + camera[1]))
+        x = map.left + self.location[0] * map.cell_size + map.indent + camera[0]
+        y = map.top + self.location[1] * map.cell_size + map.indent + camera[1]
+        screen.blit(self.texture.image, (x, y))
 
     def __delete__(self, instance):
         self.health = 0

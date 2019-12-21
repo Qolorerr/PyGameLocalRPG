@@ -1,6 +1,6 @@
 import pygame
 
-from general import textures, essences, camera
+from general import essences, camera
 from map import Map
 from hero import Hero
 from being import Being
@@ -112,13 +112,13 @@ def main():
     running = True
     gameMap = Map(10, 10)
     abilities = []
-    abilities.append(Ability('0', 8, 1, 1, True, 5, 5, splashDamage=(40, 5)))
-    abilities.append(Ability('1', 9, 1, 1, True, 5, 5, healing=10))
-    abilities.append(Ability('2', 10, 1, 1, True, 5, 5, shield=20))
-    abilities.append(Ability('3', 7, 1, 1, True, 5, 5, invisibility=1))
+    abilities.append(Ability('0', 'SplashDamage', 1, 1, True, 5, 5, splashDamage=(40, 5)))
+    abilities.append(Ability('1', 'Healing', 1, 1, True, 5, 5, healing=10))
+    abilities.append(Ability('2', 'Shield', 1, 1, True, 5, 5, shield=20))
+    abilities.append(Ability('3', 'Invisibility', 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero(nick, 100, 30, (2, 3), 2, 1, 5, 10, True))
-    essences.append(Being('BOT', 100, 50, (5, 6), 1, 10, 10, 2))
+    essences.append(Hero(nick, 100, 30, (2, 3), 'Hero1', 1, 5, 10, True))
+    essences.append(Being('BOT', 100, 50, (5, 6), 'Being1', 10, 10, 2))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
@@ -136,7 +136,7 @@ def main():
                 essences[mainHeroID].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 get_click(gameMap, pygame.mouse.get_pos())
-                essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
+                essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
         gameMap.render(screen)
         i = 0
         while i < len(essences):

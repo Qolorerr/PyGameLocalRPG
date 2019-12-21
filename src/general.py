@@ -13,18 +13,19 @@ class Texture:
 
 
 # List of textures
-textures = [Texture('grass.jpg'),
-            Texture('being1.png'),
-            Texture('hero1.jpg'),
-            Texture('attack.png', 30),
-            Texture('moveZone.png', 30),
-            Texture('sand.jpg'),
-            Texture('upperUI.png', 550),
-            Texture('caveira.png', 75),
-            Texture('sledge.png', 75),
-            Texture('doc.png', 75),
-            Texture('montagne.png', 75),
-            Texture('logo.png', 644)]
+textures = {'Grass': Texture('grass.jpg'),
+            'Being1': Texture('being1.png'),
+            'Hero1': Texture('hero1.jpg'),
+            'AttackZone': Texture('attack.png', 30),
+            'MoveZone': Texture('moveZone.png', 30),
+            'Sand': Texture('sand.jpg'),
+            'Timer': Texture('upperUI.png', 550),
+            'Invisibility': Texture('caveira.png', 75),
+            'SplashDamage': Texture('sledge.png', 75),
+            'Healing': Texture('doc.png', 75),
+            'Shield': Texture('montagne.png', 75),
+            'Logo': Texture('logo.png', 644),
+            'Crack': Texture('cracking.png')}
 
 essences = []
 

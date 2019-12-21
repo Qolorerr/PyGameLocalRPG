@@ -62,7 +62,7 @@ class Hero(Essence):
             self.do_step()
             return res
 
-    def use_ability(self, ability):
+    def use_ability(self, ability, map):
         if ability is None or ability.cd_time > 0 or self.steps == 0:
             return False
         if ability.at_time > 0:
@@ -77,6 +77,14 @@ class Hero(Essence):
                     continue
                 if abs(i.location[0] - self.location[0]) + abs(i.location[1] - self.location[1]) <= rad:
                     i.health -= dmg
+            for i in range(-rad, rad + 1):
+                for j in range(-rad, rad + 1):
+                    if abs(i) + abs(j) > rad:
+                        continue
+                    x = self.location[0] + i
+                    y = self.location[1] + j
+                    if 0 <= x <= map.width - 1 and 0 <= y <= map.height - 1:
+                        map.board[y][x][1] = True
         if 'healing' in ability.qualities:
             self.health += ability.qualities['healing']
             self.health = min(self.health, self.maxHealth)
@@ -121,10 +129,10 @@ class Hero(Essence):
                 for j in range(-self.steps, self.steps + 1):
                     if abs(i) + abs(j) > self.steps:
                         continue
-                    x = map.left + (self.location[0] + i) * map.cell_size - map.indent
-                    y = map.top + (self.location[1] + j) * map.cell_size - map.indent
-                    if -1 <= x < map.left + (map.width - 1) * map.cell_size and -1 <= y < map.top + (map.height - 1) * map.cell_size:
-                        screen.blit(textures[4].image, (x + camera[0], y + camera[1]))
+                    x = map.left + (self.location[0] + i) * map.cell_size
+                    y = map.top + (self.location[1] + j) * map.cell_size
+                    if 0 <= x <= map.left + (map.width - 1) * map.cell_size and 0 <= y <= map.top + (map.height - 1) * map.cell_size:
+                        screen.blit(textures['MoveZone'].image, (x + camera[0], y + camera[1]))
 
     def render_can_attack(self, screen, map):
         for i in essences:
@@ -134,7 +142,7 @@ class Hero(Essence):
             if abs(x - self.location[0]) + abs(y - self.location[1]) <= self.attack_range:
                 x = map.left + x * map.cell_size - map.indent
                 y = map.top + y * map.cell_size - map.indent
-                screen.blit(textures[3].image, (x + camera[0], y + camera[1]))
+                screen.blit(textures['AttackZone'].image, (x + camera[0], y + camera[1]))
 
     def render(self, screen, map):
         if self.mainHero:

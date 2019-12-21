@@ -17,13 +17,16 @@ class Map:
         self.left = 0
         self.top = 0
         self.indent = 1
-        self.cell_size = textures[0].image.get_rect().size[0] + 2 * self.indent
+        self.cell_size = textures['Grass'].image.get_rect().size[0] + 2 * self.indent
         self.generate_map()
         self.secondColor = (71, 86, 19)
+        self.cracked_texture = textures['Crack'].image
 
     # Change map settings
     def generate_map(self):
-        self.board = [[textures[random.choice([0, 0, 0, 5])].image for __ in range(self.width)] for _ in range(self.height)]
+        g = 'Grass'
+        s = 'Sand'
+        self.board = [[[textures[random.choice([g, g, g, s])].image, False] for __ in range(self.width)] for _ in range(self.height)]
 
     def set_view(self, left, top, cell_size):
         self.left = left
@@ -37,7 +40,9 @@ class Map:
             for j in range(self.width):
                 x = self.left + j * self.cell_size
                 y = self.top + i * self.cell_size
-                screen.blit(self.board[i][j], (x + self.indent + camera[0], y + self.indent + camera[1]))
+                screen.blit(self.board[i][j][0], (x + self.indent + camera[0], y + self.indent + camera[1]))
+                if self.board[i][j][1]:
+                    screen.blit(self.cracked_texture, (x + self.indent + camera[0], y + self.indent + camera[1]))
 
     # Get cell from mouse position
     def get_cell(self, pos):
