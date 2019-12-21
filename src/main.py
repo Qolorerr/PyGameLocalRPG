@@ -1,6 +1,6 @@
 import pygame
 
-from general import essences, camera
+from general import essences, camera, font_name_B
 from map import Map
 from hero import Hero
 from being import Being
@@ -24,7 +24,7 @@ def filling_bar(screen, color, rect: tuple, value, maxValue):
     rect2[3] -= 2 * indent
     rect2 = tuple(rect2)
     pygame.draw.rect(screen, color, rect2)
-    font = pygame.font.SysFont('Agency FB', 20, bold=True)
+    font = pygame.font.Font(font_name_B, 20, bold=True)
     text = font.render(str(value), 1, (255, 255, 255))
     screen.blit(text, (rect[0] + rect[2] // 2 - text.get_width() // 2, rect[1] + rect[3] // 2 - text.get_height() // 2))
 
@@ -50,25 +50,21 @@ def show_essence_info(screen):
     barheight = (height - 5 * indent) // 4
     filling_bar(screen, (219, 77, 66),
                 (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage)
-    font = pygame.font.SysFont('Agency FB', 40, bold=True)
+    font = pygame.font.Font(font_name_B, 40, bold=True)
+    maxHealth = essences[essence].maxHealth
+    filling_bar(screen, (219, 77, 66),
+                (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
+    shield = essences[essence].shield
+    maxShield = essences[essence].maxShield
+    filling_bar(screen, (81, 119, 179),
+                (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
     if type(essences[essence]) == Hero:
-        maxHealth = essences[essence].maxHealth
-        filling_bar(screen, (219, 77, 66),
-                    (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
-        shield = essences[essence].shield
-        maxShield = essences[essence].maxShield
-        filling_bar(screen, (81, 119, 179),
-                    (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
-        text = font.render(essences[essence].name + ' [' + str(essences[essence].level) + ']', 1, (255, 255, 255))
-        screen.blit(text,
-                    (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+        text = essences[essence].name + ' [' + str(essences[essence].level.get()) + ']'
     else:
-        filling_bar(screen, (219, 77, 66),
-                    (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, health)
-        filling_bar(screen, (81, 119, 179), (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), 0, 1)
-        text = font.render(essences[essence].name, 1, (255, 255, 255))
-        screen.blit(text,
-                    (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
+        text = essences[essence].name
+    text = font.render(text, 1, (255, 255, 255))
+    screen.blit(text,
+                (x + width // 2 - text.get_width() // 2, y + indent + barheight // 2 - text.get_height() // 2))
     pygame.draw.rect(screen, (200, 0, 0), (x + width - indent, y, indent, indent))
     pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y), (x + width, y + indent))
     pygame.draw.line(screen, (255, 255, 255), (x + width - indent, y + indent), (x + width, y))

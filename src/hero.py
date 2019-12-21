@@ -4,6 +4,24 @@ from general import textures, essences, camera
 from essence import Essence
 
 
+class Level:
+    def __init__(self, max_exp, coeff):
+        self.max_exp = max_exp
+        self.coeff = coeff
+        self.level = 1
+        self.exp = 0
+
+    def add_exp(self, exp):
+        self.exp += exp
+        while self.exp > self.max_exp:
+            self.level += 1
+            self.exp -= self.max_exp
+            self.max_exp *= self.coeff
+
+    def get(self):
+        return self.level
+
+
 class Hero(Essence):
     def __init__(self, name: str,
                  health: int,
@@ -14,15 +32,11 @@ class Hero(Essence):
                  attack_range: int = 1,
                  move_distance: int = 1,
                  mainHero: bool = False):
-        super().__init__(name, health, damage, location, texture, 0, 0, essence_code, attack_range, move_distance)
-        self.maxHealth = health
+        super().__init__(name, health, damage, location, texture, 0, essence_code, attack_range, move_distance)
         self.mainHero = mainHero
-        self.shield = 0
-        self.maxShield = 1
         self.invisible = 0
-        self.maxExp = 100
         self.maxGold = 100
-        self.level = 1
+        self.level = Level(100, 1.1)
         self.attack_mode = False
         self.steps = move_distance
         self.move_points = move_distance
@@ -49,11 +63,7 @@ class Hero(Essence):
     def give_reward(self, other_essence):
         if type(other_essence) != Hero:
             return
-        other_essence.exp += self.exp
-        if other_essence.exp >= other_essence.maxExp:
-            other_essence.exp -= other_essence.maxExp
-            other_essence.level += 1
-            other_essence.maxExp = int(other_essence.maxExp * 1.1)
+        other_essence.level.add_exp(self.exp)
         other_essence.gold = min(other_essence.gold + self.gold, other_essence.maxGold)
 
     def move(self, new_location, map):
@@ -124,7 +134,8 @@ class Hero(Essence):
         x = map.left + self.location[0] * map.cell_size
         y = map.top + self.location[1] * map.cell_size
         if self.mainHero:
-            pygame.draw.rect(screen, pygame.Color("red"), (x + camera[0], y + camera[1], map.cell_size, map.cell_size), 2)
+            rect = (x + camera[0], y + camera[1], map.cell_size - map.indent, map.cell_size - map.indent)
+            pygame.draw.rect(screen, pygame.Color("red"), rect, 2)
             for i in range(-self.steps, self.steps + 1):
                 for j in range(-self.steps, self.steps + 1):
                     if abs(i) + abs(j) > self.steps:

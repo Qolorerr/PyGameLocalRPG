@@ -14,8 +14,8 @@ class Texture:
 
 # List of textures
 textures = {'Grass': Texture('grass.jpg'),
-            'Being1': Texture('being1.png'),
-            'Hero1': Texture('hero1.jpg'),
+            'Being1': Texture('skeleton.png'),
+            'Hero1': Texture('knight.png'),
             'AttackZone': Texture('attack.png', 30),
             'MoveZone': Texture('moveZone.png', 30),
             'Sand': Texture('sand.jpg'),
@@ -30,3 +30,6 @@ textures = {'Grass': Texture('grass.jpg'),
 essences = []
 
 camera = []
+
+font_name_B = '../res/AGENCYB.TTF'
+font_name_R = '../res/AGENCYR.TTF'

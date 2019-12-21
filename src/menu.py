@@ -1,6 +1,6 @@
 import pygame
 import sys
-from general import textures
+from general import textures, font_name_B
 
 
 def terminate():
@@ -20,7 +20,7 @@ class Button:
         else:
             self.color_hover = color_hover
         self.text = text
-        self.font = pygame.font.SysFont('Agency FB', 40, bold=True)
+        self.font = pygame.font.Font(font_name_B, 40, bold=True)
 
     def check_clicked(self):
         mouse = pygame.mouse.get_pos()
@@ -52,7 +52,7 @@ class InputBox:
         else:
             self.color_hover = color_hover
         self.text = text
-        self.font = pygame.font.SysFont('Agency FB', 40, bold=True)
+        self.font = pygame.font.Font(font_name_B, 40, bold=True)
         self.active = False
 
     def event_handle(self, event):

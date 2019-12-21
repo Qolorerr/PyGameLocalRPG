@@ -1,6 +1,6 @@
 import pygame
 from math import pi
-from general import essences, textures
+from general import essences, textures, font_name_B, font_name_R
 from hero import Hero
 from being import Being
 
@@ -14,8 +14,8 @@ class UserInterface:
         self.essence = essences[essence]
         self.upTexture = textures['Timer']
         self.upIndent = 5
-        self.timeFont = pygame.font.SysFont('Agency FB', 20)
-        self.scoreFont = pygame.font.SysFont('Agency FB', 20, bold=True)
+        self.timeFont = pygame.font.Font(font_name_R, 20)
+        self.scoreFont = pygame.font.Font(font_name_B, 20, bold=True)
 
 
     def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
@@ -55,8 +55,9 @@ class UserInterface:
         self.circle_show(screen, (self.width - 350, self.height - 100), (53, 146, 196), self.essence.steps,
                          self.essence.steps, self.essence.move_points, (self.width - 400, self.height - 150, 100, 100))
         # Show exp and level
-        self.circle_show(screen, (self.width - 100, self.height - 100), (255, 255, 255), self.essence.level,
-                         self.essence.exp, self.essence.maxExp, (self.width - 150, self.height - 150, 100, 100))
+        self.circle_show(screen, (self.width - 100, self.height - 100), (255, 255, 255), self.essence.level.get(),
+                         self.essence.level.exp, self.essence.level.max_exp,
+                         (self.width - 150, self.height - 150, 100, 100))
         # Show gold
         self.circle_show(screen, (self.width - 225, self.height - 100), (255, 215, 0), self.essence.gold,
                          self.essence.gold, self.essence.maxGold, (self.width - 275, self.height - 150, 100, 100))

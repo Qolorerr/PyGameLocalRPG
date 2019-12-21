@@ -9,17 +9,18 @@ class Essence:
                  damage: int,
                  location: tuple,
                  texture: int,
-                 exp: int,
                  gold: int,
                  essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
         self.name = name
         self.health = health
+        self.maxHealth = health
         self.damage = damage
+        self.shield = 0
+        self.maxShield = 1
         self.location = location
         self.texture = textures[texture]
-        self.exp = exp
         self.gold = gold
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
@@ -81,6 +82,8 @@ class Essence:
     def render(self, screen, map):
         x = map.left + self.location[0] * map.cell_size + map.indent + camera[0]
         y = map.top + self.location[1] * map.cell_size + map.indent + camera[1]
+        w, h = self.texture.image.get_rect()[-2:]
+        y -= h - w
         screen.blit(self.texture.image, (x, y))
 
     def __delete__(self, instance):
