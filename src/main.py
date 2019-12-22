@@ -9,6 +9,7 @@ from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 from menu import menu, terminate
 import ctypes
+from client import Client
 
 
 showing_essence = None
@@ -103,6 +104,13 @@ def get_mainHeroID():
 
 
 def main():
+    client = Client()
+    flag = None
+    while flag is None:
+        flag = client.get_info()
+        print(flag)
+    print(client.your_hero_id)
+    pygame.init()
     ctypes.windll.user32.SetProcessDPIAware()
     resolution = (1920, 1080)
     screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
@@ -115,10 +123,9 @@ def main():
     abilities.append(Ability('2', 'Shield', 1, 1, True, 5, 5, shield=20))
     abilities.append(Ability('3', 'Invisibility', 1, 1, True, 5, 5, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
-    essences.append(Hero(nick, 100, 30, (2, 3), 'Hero1', 1, 5, 10, True))
-    essences.append(Being('BOT', 100, 50, (5, 6), 'Being1', 10, 10, 2))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
+    print(essences)
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
               (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
     cameraY = -gameMap.top - essences[mainHeroID].location[1] * (gameMap.cell_size + gameMap.indent) + \
@@ -133,8 +140,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 essences[mainHeroID].get_event(event.unicode, gameMap, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mainHeroID = get_mainHeroID()
                 get_click(gameMap, pygame.mouse.get_pos())
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
         gameMap.render(screen)
         i = 0
         while i < len(essences):
@@ -153,7 +163,10 @@ def main():
         userinterface.render(screen)
         show_essence_info(screen)
         pygame.display.flip()
+        client.get_info()
+    pygame.quit()
+    client.disconnect()
+    print("socket was closed")
 
 
-pygame.init()
 main()

@@ -7,10 +7,9 @@ class Essence:
     def __init__(self, name: str,
                  health: int,
                  damage: int,
-                 location: tuple,
+                 location: list,
                  texture: int,
                  gold: int,
-                 essence_code: int = 1,  # unicode
                  attack_range: int = 1,
                  move_distance: int = 1):
         self.name = name
@@ -20,13 +19,14 @@ class Essence:
         self.shield = 0
         self.maxShield = 1
         self.location = location
+        self.texture_name = texture
         self.texture = textures[texture]
         self.gold = gold
         self.init_constant()
         self.live = self.ESSENSE_ALIVE
-        self.essence_code = essence_code
         self.attack_range = attack_range
         self.move_distance = move_distance
+        self.essence_code = None
 
     # Initialize constants for better code readability
     def init_constant(self):
@@ -51,7 +51,6 @@ class Essence:
             self.response_to_damage(other_essence)
             return self.ESSENSE_ALIVE
         if self.alive() == self.ESSENSE_DIE:
-            self.who_killed_me = other_essence
             self.give_reward(other_essence)
             return self.ESSENSE_DIE
 
@@ -85,6 +84,19 @@ class Essence:
         w, h = self.texture.image.get_rect()[-2:]
         y -= h - w
         screen.blit(self.texture.image, (x, y))
+
+    def __bytes__(self):
+        info = {"name": self.name,
+                "health": self.health,
+                "damage": self.damage,
+                "location": self.location,
+                "texture": self.texture_name,
+                "gold": self.gold,
+                "code": self.essence_code,
+                "live": self.live,
+                "type": 'essence'}
+        info = bytes(str(info), encoding='utf-8')
+        return info
 
     def __delete__(self, instance):
         self.health = 0
