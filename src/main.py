@@ -27,8 +27,10 @@ def get_click(gameMap: Map, pos):
 
 def main():
     client = Client()
-    client.get_info()
-    client.change_essences()
+    flag = None
+    while flag is None:
+        flag = client.get_info()
+        print(flag)
     pygame.init()
     resolution = (1000, 700)
     screen = pygame.display.set_mode(resolution)
@@ -58,9 +60,6 @@ def main():
                 essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()))
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
-                client.get_info()
-                client.change_essences()
-                print("essences", essences)
         gameMap.render(screen)
         for i in range(len(essences)):
             if i == mainHeroID:
@@ -72,7 +71,9 @@ def main():
         abilityInterface.render(screen)
         userinterface.render(screen)
         pygame.display.flip()
+        client.get_info()
     pygame.quit()
     client.disconnect()
+    print("socket was closed")
 
 main()

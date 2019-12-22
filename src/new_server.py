@@ -29,7 +29,6 @@ class Server:
 
     def generate_essence_code(self):
         A = list(map(lambda x: x["code"], self.essences))
-        print(A)
         if self.essences == []:
             return 0
         A = min(list(set([i for i in range(max(A) + 2)]) - set(A)))
@@ -64,10 +63,6 @@ class Server:
         rlist = [sock_producer, sock_consumer_listener]
         wlist = []
         errlist = []
-        intersection = []
-        out_buffer = []
-        code = 1
-        location = [1, 1]
         while True:
             r, w, err = select.select(rlist, wlist, errlist)
             for sock in r:
@@ -79,18 +74,21 @@ class Server:
                     cons, addr = sock.accept()
                     clients.append(cons)
                     wlist.append(cons)
-
                 else:
                     change = False
-                    out_buffer = list(map(lambda x: eval(x.decode('utf-8')), eval(sock.recv(1024).decode('utf-8'))))
+                    try:
+                        out_buffer = list(map(lambda x: eval(x.decode('utf-8')), eval(sock.recv(1024).decode('utf-8'))))
+                    except:
+                        del(rlist[rlist.index(sock)])
+                        out_buffer = []
                     if out_buffer != []:
-                        essences = out_buffer
-                        print(essences)
+                        self.essences = out_buffer
                         for ind, s in enumerate(rlist[2::]):
-                            if s in clients and s is not sock:
+                            if s is not sock:
                                 if ind == self.whose_move:
                                     change = True
-                                s.send(bytes(str([essences, bool(ind == self.whose_move)]), encoding='utf-8'))
+                                mes = str([self.essences, bool(ind == self.whose_move)])
+                                s.send(bytes(mes, encoding='utf-8'))
                         self.whose_move = (self.whose_move + int(change)) % self.players
 
                 intersection = list(set(rlist) - set(last_sock))
@@ -98,12 +96,7 @@ class Server:
                 for i in intersection:
                     self.generate_new_hero(2)
                     i.send(bytes(str(self.essences[-1]["code"]), encoding='utf-8'))
-                    i.send(bytes(str(self.essences), encoding='utf-8'))
-
-            out_buffer = []
-            for sock in w:
-                if sock in clients:
-                    sock.send(bytes(str(out_buffer), encoding='utf-8'))
+                    i.send(bytes(str([self.essences, False]), encoding='utf-8'))
 
 
 server = Server(10, 8)

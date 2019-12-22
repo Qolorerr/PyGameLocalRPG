@@ -3,6 +3,7 @@ import socket
 from general import essences
 from hero import Hero
 from being import Being
+import select
 
 
 class Client:
@@ -19,7 +20,6 @@ class Client:
         return True
 
     def change_essences(self):
-        print(self.data)
         for ind, es in enumerate(self.data):
             essence_ind = None
             for i, b in enumerate(essences):
@@ -53,19 +53,15 @@ class Client:
             essences[essence_ind].who_killed_me = es['who_killed']
 
     def get_info(self):
-        data = b''
-        while data == b'':
+        r, w, err = select.select([self.sock], [self.sock], [], 0.1)
+        if r != []:
             data = self.sock.recv(1024)
-        print(data)
-        data = eval(data.decode('utf-8'))
-        if data[-1] is True:
+            print(data)
+            data = eval(data.decode('utf-8'))
             self.data = data[0]
-            print(self.data)
-            return True
-        else:
-            self.data = data
-            print(self.data)
-            return False
+            self.change_essences()
+            return data[1]
+        return None
 
     def disconnect(self):
         self.sock.close()
