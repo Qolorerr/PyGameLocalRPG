@@ -8,6 +8,7 @@ from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 from menu import menu, terminate
+import ctypes
 
 
 showing_essence = None
@@ -102,8 +103,9 @@ def get_mainHeroID():
 
 
 def main():
+    ctypes.windll.user32.SetProcessDPIAware()
     resolution = (1920, 1080)
-    screen = pygame.display.set_mode(resolution)
+    screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
     nick = menu(screen, resolution)
     running = True
     gameMap = Map(10, 10)
