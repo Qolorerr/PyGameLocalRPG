@@ -8,6 +8,7 @@ from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 from menu import menu, terminate
+from death import death
 import ctypes
 from client import Client
 
@@ -125,7 +126,7 @@ def main():
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
-    print(essences)
+    essences[mainHeroID].name = nick
     cameraX = -gameMap.left - essences[mainHeroID].location[0] * (gameMap.cell_size + gameMap.indent) + \
               (infoObj.current_w - (gameMap.cell_size + gameMap.indent)) // 2
     cameraY = -gameMap.top - essences[mainHeroID].location[1] * (gameMap.cell_size + gameMap.indent) + \
@@ -133,18 +134,25 @@ def main():
     camera.append(cameraX)
     camera.append(cameraY)
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
+    timer = 0
+    clock = pygame.time.Clock()
+    if client.your_hero_id == get_mainHeroID():
+        timer = 1.5 * 60 * 1000
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 terminate()
-            if event.type == pygame.KEYDOWN:
-                essences[mainHeroID].get_event(event.unicode, gameMap, screen)
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if client.your_hero_id == get_mainHeroID():
                 mainHeroID = get_mainHeroID()
-                get_click(gameMap, pygame.mouse.get_pos())
-                essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
+                if event.type == pygame.KEYDOWN:
+                    essences[mainHeroID].get_event(event.unicode, gameMap, screen)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mainHeroID = get_mainHeroID()
+                    get_click(gameMap, pygame.mouse.get_pos())
+                    essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                    timer = 0
+        timer = max(0, timer - clock.tick())
         gameMap.render(screen)
         i = 0
         while i < len(essences):
@@ -152,6 +160,9 @@ def main():
                 del(essences[i])
             else:
                 i += 1
+        mainHeroID = get_mainHeroID()
+        if mainHeroID == -1:
+            death(screen, resolution)
         for i in range(len(essences)):
             if i == mainHeroID:
                 continue
@@ -160,10 +171,16 @@ def main():
         if essences[mainHeroID].attack_mode:
             essences[mainHeroID].render_can_attack(screen, gameMap)
         abilityInterface.render(screen)
-        userinterface.render(screen)
+        userinterface.render(screen, timer)
         show_essence_info(screen)
         pygame.display.flip()
-        client.get_info()
+        if client.get_info() is not None:
+            if client.your_hero_id == get_mainHeroID():
+                timer = 1.5 * 60 * 1000
+                essences[client.your_hero_id].steps = essences[client.your_hero_id].move_distance
+        if client.your_hero_id == get_mainHeroID() and timer == 0:
+            essences[client.your_hero_id].steps = 0
+            client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
     pygame.quit()
     client.disconnect()
     print("socket was closed")

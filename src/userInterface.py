@@ -26,12 +26,14 @@ class UserInterface:
         pygame.draw.arc(screen, color, arcCoords, -coeff, pi / 2, 5)
 
 
-    def render(self, screen):
+    def render(self, screen, timer):
         # Show upper part of GUI
         upSize = self.upTexture.size
         coords = ((self.width - upSize[0]) // 2, 0)
         screen.blit(self.upTexture.image, coords)
-        text = self.timeFont.render('00:00', 1, (255, 255, 255))
+        minutes = str(int(timer // (60 * 1000))).rjust(2, '0')
+        seconds = str(int((timer // 1000) % 60)).rjust(2, '0')
+        text = self.timeFont.render(minutes + ':' + seconds, 1, (255, 255, 255))
         screen.blit(text, (self.width // 2 - text.get_width() // 2, self.upIndent))
         heroes = 0
         beings = 0

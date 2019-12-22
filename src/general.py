@@ -19,13 +19,14 @@ textures = {'Grass': Texture('grass.jpg'),
             'AttackZone': Texture('attack.png', 30),
             'MoveZone': Texture('moveZone.png', 30),
             'Sand': Texture('sand.jpg'),
-            'Timer': Texture('upperUI.png', 550),
-            'Invisibility': Texture('caveira.png', 75),
-            'SplashDamage': Texture('sledge.png', 75),
-            'Healing': Texture('doc.png', 75),
-            'Shield': Texture('montagne.png', 75),
-            'Logo': Texture('logo.png', 644),
-            'Crack': Texture('cracking.png')}
+            'Timer': Texture('upperUI.png', 552),
+            'Invisibility': Texture('caveira.png', 77),
+            'SplashDamage': Texture('sledge.png', 77),
+            'Healing': Texture('doc.png', 77),
+            'Shield': Texture('montagne.png', 77),
+            'Logo': Texture('logo.png', 646),
+            'Crack': Texture('cracking.png'),
+            'Death': Texture('death.jpg', 342)}
 
 essences = []
 
