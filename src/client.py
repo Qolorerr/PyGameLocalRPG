@@ -4,7 +4,7 @@ from general import essences
 from hero import Hero
 from being import Being
 import select
-import copy
+import struct
 
 
 class Client:
@@ -14,11 +14,8 @@ class Client:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.host, self.port))
         self.data = None
-        self.your_hero_id = int(self.sock.recv(10240).decode('utf-8'))
-
-    def send_info(self, mes: bytes):
-        self.sock.sendall(mes)
-        return True
+        self.your_hero_id = int(self.recv_msg())
+        self.you_main_client = bool(eval(self.recv_msg()))
 
     def change_essences(self):
         essences.clear()
@@ -40,10 +37,37 @@ class Client:
                                       es['gold']))
                 essences[-1].essence_code = es["code"]
 
+    def send_msg(self, msg):
+        # Каждое сообщение будет иметь префикс в 4 байта блинной(network byte order)
+        msg = struct.pack('>I', len(msg)) + bytes(msg, encoding='utf-8')
+        self.sock.send(msg)
+
+    def first_client(self, count_clients):
+        self.send_msg(str(count_clients))
+
+    def recv_msg(self):
+        # Получение длины сообщения и распаковка в integer
+        raw_msglen = self.recvall(4)
+        if not raw_msglen:
+            return None
+        msglen = struct.unpack('>I', raw_msglen)[0]
+        # Получение данных
+        return self.recvall(msglen)
+
+    def recvall(self, n):
+        # Функция для получения n байт или возврата None если получен EOF
+        data = b''
+        while len(data) < n:
+            packet = self.sock.recv(n - len(data))
+            if not packet:
+                return None
+            data += packet
+        return data
+
     def get_info(self):
         r, w, err = select.select([self.sock], [self.sock], [], 0.1)
         if r != []:
-            data = self.sock.recv(1024)
+            data = self.recv_msg()
             print(data)
             data = eval(data.decode('utf-8'))
             self.data = data[0]

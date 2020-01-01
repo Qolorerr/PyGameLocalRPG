@@ -106,11 +106,13 @@ def get_mainHeroID():
 
 def main():
     client = Client()
-    flag = None
-    while flag is None:
-        flag = client.get_info()
-        print(flag)
-    print(client.your_hero_id)
+    step = None
+    print("gg")
+    while step is None:
+        step = client.get_info()
+        print(step)
+    if client.you_main_client:
+        client.first_client(int(input()))
     pygame.init()
     ctypes.windll.user32.SetProcessDPIAware()
     resolution = (1920, 1080)
@@ -136,8 +138,10 @@ def main():
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
     timer = 0
     clock = pygame.time.Clock()
-    if client.your_hero_id == get_mainHeroID():
+    if step is True:
         timer = 1.5 * 60 * 1000
+    else:
+        essences[get_mainHeroID()].steps = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
@@ -174,13 +178,18 @@ def main():
         userinterface.render(screen, timer)
         show_essence_info(screen)
         pygame.display.flip()
-        if client.get_info() is not None:
-            if client.your_hero_id == get_mainHeroID():
+        info = client.get_info()
+        if info is not None:
+            if info is True:
+                print('----info')
+                step = True
                 timer = 1.5 * 60 * 1000
                 essences[client.your_hero_id].steps = essences[client.your_hero_id].move_distance
-        if client.your_hero_id == get_mainHeroID() and timer == 0:
+        if step is True and (essences[get_mainHeroID()].steps == 0 or timer == 0):
             essences[client.your_hero_id].steps = 0
-            client.send_info(bytes(str(list(map(bytes, essences))), encoding='utf-8'))
+            timer = 0
+            client.send_msg(str(list(map(bytes, essences))))
+            step = False
     pygame.quit()
     client.disconnect()
     print("socket was closed")

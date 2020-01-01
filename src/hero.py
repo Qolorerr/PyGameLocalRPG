@@ -38,7 +38,7 @@ class Hero(Essence):
         self.maxGold = 100
         self.level = Level(100, 1.1)
         self.attack_mode = False
-        self.steps = move_distance
+        self.steps = 0
         self.move_points = move_distance
 
     def step_update(self):
