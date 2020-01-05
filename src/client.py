@@ -28,14 +28,16 @@ class Client:
                                      es['texture'],
                                      es["gold"]))
                 essences[-1].mainHero = es["code"] == self.your_hero_id
-                essences[-1].essence_code = es["code"]
             else:
                 essences.append(Being(es['health'],
                                       es['damage'],
                                       es['location'],
                                       es['texture'],
                                       es['gold']))
-                essences[-1].essence_code = es["code"]
+            essences[-1].essence_code = es["code"]
+            essences[-1].maxHealth = es["maxHealth"]
+            essences[-1].shield = es["shield"]
+            essences[-1].maxShield = es["maxShield"]
 
     def send_msg(self, msg):
         # Каждое сообщение будет иметь префикс в 4 байта блинной(network byte order)

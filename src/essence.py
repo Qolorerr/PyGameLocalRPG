@@ -94,6 +94,9 @@ class Essence:
                 "gold": self.gold,
                 "code": self.essence_code,
                 "live": self.live,
+                "maxHealth": self.maxHealth,
+                "shield": self.shield,
+                "maxShield": self.maxShield,
                 "type": 'essence'}
         info = bytes(str(info), encoding='utf-8')
         return info

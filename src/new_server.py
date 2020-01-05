@@ -40,11 +40,14 @@ class Server:
         info = {"name": "Lox",
                 "health": 100,
                 "damage": 10,
-                "location": list(self.generate_location()),
+                "location": self.generate_location(),
                 "texture": texture,
                 "gold": 100,
                 "code": self.generate_essence_code(),
                 "live": 1,
+                "maxHealth": 100,
+                "shield": 0,
+                "maxShield": 20,
                 "type": 'hero'}
         self.essences.append(info)
 
@@ -107,6 +110,7 @@ class Server:
             if len(rlist) <= 2:
                 self.listener = None
                 self.essences.clear()
+                self.end_connecting = False
             r, w, err = select.select(rlist, wlist, errlist, 1)
             for sock in r:
                 if sock == sock_producer:
@@ -124,7 +128,7 @@ class Server:
                     cons, addr = sock.accept()
                     clients.append(cons)
                     wlist.append(cons)
-                elif self.listener is not None and self.listener == len(rlist) - 2:
+                elif self.listener is not None and self.end_connecting is True:
                     change = False
                     try:
                         info = self.recv_msg(sock)
@@ -143,8 +147,7 @@ class Server:
                             self.send_msg(mes, s)
                         self.whose_move = (self.whose_move + int(change)) % (len(rlist) - 2)
                         print(self.whose_move)
-                print('------listeners ==', self.listener)
 
 
-server = Server(10, 8)
+server = Server(100, 8)
 server.start()

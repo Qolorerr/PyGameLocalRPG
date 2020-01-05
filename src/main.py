@@ -82,7 +82,7 @@ def on_click(coords):
                 del(essences[i])
             elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
                 del(essences[mainHeroID])
-        elif essences[i].location == coords:
+        elif list(essences[i].location) == list(coords):
             showing_essence = essences[i].essence_code
 
 
@@ -107,10 +107,8 @@ def get_mainHeroID():
 def main():
     client = Client()
     step = None
-    print("gg")
     while step is None:
         step = client.get_info()
-        print(step)
     if client.you_main_client:
         client.first_client(int(input()))
     pygame.init()
@@ -119,7 +117,7 @@ def main():
     screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
     nick = menu(screen, resolution)
     running = True
-    gameMap = Map(10, 10)
+    gameMap = Map(100, 100)
     abilities = []
     abilities.append(Ability('0', 'SplashDamage', 1, 1, True, 5, 5, splashDamage=(40, 5)))
     abilities.append(Ability('1', 'Healing', 1, 1, True, 5, 5, healing=10))
@@ -151,11 +149,11 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     essences[mainHeroID].get_event(event.unicode, gameMap, screen)
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    mainHeroID = get_mainHeroID()
                     get_click(gameMap, pygame.mouse.get_pos())
                     essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                     timer = 0
+                    essences[mainHeroID].step = 0
         timer = max(0, timer - clock.tick())
         gameMap.render(screen)
         i = 0
@@ -192,7 +190,6 @@ def main():
             step = False
     pygame.quit()
     client.disconnect()
-    print("socket was closed")
 
 
 main()
