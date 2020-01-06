@@ -38,6 +38,7 @@ class Client:
             essences[-1].maxHealth = es["maxHealth"]
             essences[-1].shield = es["shield"]
             essences[-1].maxShield = es["maxShield"]
+            essences[-1].invisible = es["invise"]
 
     def send_msg(self, msg):
         # Каждое сообщение будет иметь префикс в 4 байта блинной(network byte order)

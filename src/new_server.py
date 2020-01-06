@@ -26,8 +26,20 @@ class Server:
         new_location = random.choice(A)
         return new_location
 
-    def generate_new_being(self):
-        pass
+    def generate_new_being(self, texture):
+        info = {"name": "Bot",
+                "health": 40,
+                "damage": 5,
+                "location": self.generate_location(),
+                "texture": texture,
+                "gold": 50,
+                "code": self.generate_essence_code(),
+                "live": 1,
+                "maxHealth": 40,
+                "shield": 0,
+                "maxShield": 0,
+                "type": 'essence'}
+        self.essences.append(info)
 
     def generate_essence_code(self):
         A = list(map(lambda x: x["code"], self.essences))
@@ -48,6 +60,7 @@ class Server:
                 "maxHealth": 100,
                 "shield": 0,
                 "maxShield": 20,
+                "invise": 0,
                 "type": 'hero'}
         self.essences.append(info)
 

@@ -3,7 +3,7 @@ import pygame
 from general import essences, camera, font_name_B
 from map import Map
 from hero import Hero
-from being import Being
+import socket
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
@@ -93,7 +93,8 @@ def get_click(gameMap: Map, pos):
         showing_essence = None
         return
     cell = gameMap.get_cell((pos[0] - camera[0], pos[1] - camera[1]))
-    on_click(cell)
+    if cell is not None:
+        on_click(cell)
 
 
 def get_mainHeroID():
@@ -105,6 +106,7 @@ def get_mainHeroID():
 
 
 def main():
+    print("my IP---", socket.gethostbyname(socket.gethostname()))
     client = Client()
     step = None
     while step is None:
@@ -119,10 +121,10 @@ def main():
     running = True
     gameMap = Map(100, 100)
     abilities = []
-    abilities.append(Ability('0', 'SplashDamage', 1, 1, True, 5, 5, splashDamage=(40, 5)))
-    abilities.append(Ability('1', 'Healing', 1, 1, True, 5, 5, healing=10))
-    abilities.append(Ability('2', 'Shield', 1, 1, True, 5, 5, shield=20))
-    abilities.append(Ability('3', 'Invisibility', 1, 1, True, 5, 5, invisibility=1))
+    abilities.append(Ability('0', 'SplashDamage', 1, 8, False, 2, 1, splashDamage=(40, 5)))
+    abilities.append(Ability('1', 'Healing', 2, 8, False, 10, 1, healing=10))
+    abilities.append(Ability('2', 'Shield', 3, 8, False, 10, 2, shield=20))
+    abilities.append(Ability('3', 'Invisibility', 4, 8, False, 20, 2, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
@@ -173,6 +175,7 @@ def main():
         if essences[mainHeroID].attack_mode:
             essences[mainHeroID].render_can_attack(screen, gameMap)
         abilityInterface.render(screen)
+        userinterface.essence = essences[mainHeroID]
         userinterface.render(screen, timer)
         show_essence_info(screen)
         pygame.display.flip()
@@ -182,7 +185,7 @@ def main():
                 print('----info')
                 step = True
                 timer = 1.5 * 60 * 1000
-                essences[client.your_hero_id].steps = essences[client.your_hero_id].move_distance
+                essences[client.your_hero_id].step_update()
         if step is True and (essences[get_mainHeroID()].steps == 0 or timer == 0):
             essences[client.your_hero_id].steps = 0
             timer = 0

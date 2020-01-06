@@ -16,7 +16,11 @@ class UserInterface:
         self.upIndent = 5
         self.timeFont = pygame.font.Font(font_name_R, 20)
         self.scoreFont = pygame.font.Font(font_name_B, 20, bold=True)
-
+        self.coords = {"healing": (100, self.height - 100),
+                       "shield": (225, self.height - 100),
+                       "steps": (self.width - 350, self.height - 100),
+                       "level": (self.width - 100, self.height - 100),
+                       "gold": (self.width - 225, self.height - 100)}
 
     def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
         pygame.draw.circle(screen, color, centreCoords, 50, 1)
@@ -24,7 +28,6 @@ class UserInterface:
         screen.blit(text, (centreCoords[0] - text.get_width() // 2, centreCoords[1] - text.get_height() // 2))
         coeff = (currentVal / maxVal) * 2 * pi - pi / 2
         pygame.draw.arc(screen, color, arcCoords, -coeff, pi / 2, 5)
-
 
     def render(self, screen, timer):
         # Show upper part of GUI
@@ -63,3 +66,15 @@ class UserInterface:
         # Show gold
         self.circle_show(screen, (self.width - 225, self.height - 100), (255, 215, 0), self.essence.gold,
                          self.essence.gold, self.essence.maxGold, (self.width - 275, self.height - 150, 100, 100))
+
+    def get_user_inteface_cell(self, pos):
+        for i in self.coords.keys():
+            if self.coords[i][0] - 25 <= pos[0] <= self.coords[i][0] + 25:
+                return i
+
+    def show_mini_menu(self, pos):
+        self.get_user_inteface_cell(pos)
+
+
+    def upgrade_something(self, user_interface_cell):
+        pass

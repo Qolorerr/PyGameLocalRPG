@@ -15,7 +15,7 @@ class Ability:
         self.name = name
         self.texture = textures[texture]
         self.ability_code = ability_code
-        self.ability_lvl = 1
+        self.ability_lvl = 0
         self.max_lvl = max_lvl
         self.active = active
         self.cool_down = cool_down
@@ -24,6 +24,7 @@ class Ability:
         self.at_time = 0
         self.qualities = kwargs
         self.init_constant()
+        self.coeff = 1.1
 
     def init_constant(self):
         self.NOW_MAX_LVL = 0
@@ -38,7 +39,14 @@ class Ability:
 
     # Increase in parameters of ability
     def improve_ability(self):
-        pass
+        if self.name == "0":
+            self.qualities["splashDamage"][0] = int(self.qualities["splashDamage"][0] * self.coeff)
+        elif self.name == "1":
+            self.qualities["healing"] = int(self.qualities["healing"] * self.coeff)
+        elif self.name == "2":
+            self.qualities["shield"] = int(self.qualities["shield"] * self.coeff)
+        elif self.name == "3":
+            self.cool_down -= 1
 
 
 # Interface all abilities of hero

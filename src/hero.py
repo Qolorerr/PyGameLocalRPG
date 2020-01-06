@@ -2,24 +2,7 @@ import pygame
 
 from general import textures, essences, camera
 from essence import Essence
-
-
-class Level:
-    def __init__(self, max_exp, coeff):
-        self.max_exp = max_exp
-        self.coeff = coeff
-        self.level = 1
-        self.exp = 0
-
-    def add_exp(self, exp):
-        self.exp += exp
-        while self.exp > self.max_exp:
-            self.level += 1
-            self.exp -= self.max_exp
-            self.max_exp *= self.coeff
-
-    def get(self):
-        return self.level
+from level import Level
 
 
 class Hero(Essence):
@@ -40,6 +23,7 @@ class Hero(Essence):
         self.attack_mode = False
         self.steps = 0
         self.move_points = move_distance
+        self.lvl_points = 1
 
     def step_update(self):
         self.steps = self.move_distance
@@ -171,5 +155,6 @@ class Hero(Essence):
     def __bytes__(self):
         info = eval(super().__bytes__().decode('utf-8'))
         info["type"] = "hero"
+        info["invise"] = self.invisible
         info = bytes(str(info), encoding='utf-8')
         return info
