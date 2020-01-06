@@ -3,6 +3,7 @@ from math import pi
 from general import essences, textures, font_name_B, font_name_R
 from hero import Hero
 from being import Being
+from infoBar import InfoBar
 
 
 class UserInterface:
@@ -16,11 +17,13 @@ class UserInterface:
         self.upIndent = 5
         self.timeFont = pygame.font.Font(font_name_R, 20)
         self.scoreFont = pygame.font.Font(font_name_B, 20, bold=True)
-        self.coords = {"healing": (100, self.height - 100),
+        self.coords = {"health": (100, self.height - 100),
                        "shield": (225, self.height - 100),
                        "steps": (self.width - 350, self.height - 100),
                        "level": (self.width - 100, self.height - 100),
                        "gold": (self.width - 225, self.height - 100)}
+        self.info_name = None
+        self.max_gold = 100
 
     def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
         pygame.draw.circle(screen, color, centreCoords, 50, 1)
@@ -66,15 +69,44 @@ class UserInterface:
         # Show gold
         self.circle_show(screen, (self.width - 225, self.height - 100), (255, 215, 0), self.essence.gold,
                          self.essence.gold, self.essence.maxGold, (self.width - 275, self.height - 150, 100, 100))
+        if self.info_name is not None and 0 < self.info_name[0].time:
+            self.info_name[0].render(screen)
+            self.info_name[0].time -= self.info_name[1].tick()
+        else:
+            self.info_name = None
 
-    def get_user_inteface_cell(self, pos):
+    def get_user_interface_cell(self, pos):
         for i in self.coords.keys():
-            if self.coords[i][0] - 25 <= pos[0] <= self.coords[i][0] + 25:
+            if self.coords[i][0] - 50 <= pos[0] <= self.coords[i][0] + 50 and \
+                    self.coords[i][1] - 50 <= pos[1] <= self.coords[i][1] + 50:
                 return i
+        return False
 
-    def show_mini_menu(self, pos):
-        self.get_user_inteface_cell(pos)
+    def show_info(self, pos):
+        name = self.get_user_interface_cell(pos)
+        if name is not False:
+            if name == "health":
+                infoBar = InfoBar("MAX Health = " + str(self.essence.maxHealth) + ", now health = " +
+                                  str(self.essence.health) + " and can be improved" * int(self.essence.lvl_points > 0))
+            elif name == "shield":
+                infoBar = InfoBar("MAX Shield = " + str(self.essence.maxShield) + ", now shield = " +
+                                  str(self.essence.shield) + " and can be improved" * int(self.essence.lvl_points > 0))
+            elif name == "steps":
+                infoBar = InfoBar("MAX Steps = " + str(self.essence.move_distance) + ", now steps = " +
+                                  str(self.essence.steps) + " and can be improved" * int(self.essence.lvl_points > 0))
+            elif name == "level":
+                infoBar = InfoBar("Need experience for upgrade = " +
+                                  str(self.essence.level.max_exp - self.essence.level.exp))
+            elif name == "gold":
+                infoBar = InfoBar("Gold = " + str(self.essence.gold))
+            clock = pygame.time.Clock()
+            infoBar.pos = pos
+            self.info_name = [infoBar, clock]
 
-
-    def upgrade_something(self, user_interface_cell):
-        pass
+    def upgrade_component(self, component):
+        if component == 'health':
+            self.essence.maxHealth += 40
+        elif component == "steps":
+            self.essence.move_distance += 1
+        elif component == "gold":
+            self.essence.maxGold *= 2

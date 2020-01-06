@@ -1,5 +1,6 @@
 import pygame
 from general import textures
+from infoBar import InfoBar
 
 
 # Class hero's ability
@@ -15,7 +16,7 @@ class Ability:
         self.name = name
         self.texture = textures[texture]
         self.ability_code = ability_code
-        self.ability_lvl = 0
+        self.ability_lvl = 1
         self.max_lvl = max_lvl
         self.active = active
         self.cool_down = cool_down
@@ -48,6 +49,17 @@ class Ability:
         elif self.name == "3":
             self.cool_down -= 1
 
+    def update_ability(self):
+        if self.cd_time > 0:
+            self.cd_time -= 1
+        if self.active:
+            self.at_time += 1
+        if self.at_time > self.action_time:
+            self.at_time = 0
+            return False
+        else:
+            return True
+
 
 # Interface all abilities of hero
 class AbilityInterface:
@@ -63,6 +75,7 @@ class AbilityInterface:
         self.window_height = window_height
         self.width = 4
         self.height = 1
+        self.info_name = None
 
     def render(self, screen):
         x = self.left
@@ -75,6 +88,12 @@ class AbilityInterface:
             screen.blit(abl.texture.image, (x, y))
             x += self.indent + abl.texture.size[0]
 
+        if self.info_name is not None and 0 < self.info_name[0].time:
+            self.info_name[0].render(screen)
+            self.info_name[0].time -= self.info_name[1].tick()
+        else:
+            self.info_name = None
+
     # Return ability when user clicked on ability
     def get_ability_on_click(self, pos):
         x = (pos[0] - self.left) // self.ability_size
@@ -83,3 +102,34 @@ class AbilityInterface:
                 x >= self.width or y >= self.height):
             return None
         return self.abilities[x]
+
+    def show_info(self, pos, essence):
+        ability = self.get_ability_on_click(pos)
+        if ability is not None:
+            if ability.name == "0":
+                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
+                                  " Deals damage = " + str(ability.qualities["splashDamage"][0]) + ", range = " +
+                                  str(ability.qualities["splashDamage"][1]) +
+                                  ", cool down = " + str(ability.cool_down)
+                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
+                                  " and can be improved" * int(essence.lvl_points > 0))
+            elif ability.name == "1":
+                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
+                                  " Heals you " + str(ability.qualities["healing"]) + " health"
+                                  ", cool down = " + str(ability.cool_down) + ", make " + str(ability.cd_time) +
+                                  " moves to reapply" + " and can be improved" * int(essence.lvl_points > 0))
+            elif ability.name == "2":
+                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
+                                  " Gives you a shield that blocks damage = " + str(ability.qualities["shield"]) +
+                                  ", cool down = " + str(ability.cool_down)
+                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
+                                  " and can be improved" * int(essence.lvl_points > 0))
+            elif ability.name == "3":
+                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
+                                  " Gives you complete invisibility for " + str(ability.qualities["invisibility"]) +
+                                  " turns, cool down = " + str(ability.cool_down)
+                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
+                                  " and can be improved" * int(essence.lvl_points > 0))
+            clock = pygame.time.Clock()
+            infoBar.pos = pos
+            self.info_name = [infoBar, clock]

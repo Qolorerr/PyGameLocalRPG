@@ -24,9 +24,11 @@ class Hero(Essence):
         self.steps = 0
         self.move_points = move_distance
         self.lvl_points = 1
+        self.upgrade_mode = False
 
-    def step_update(self):
+    def step_update(self, ability_interface):
         self.steps = self.move_distance
+        self.new_step(ability_interface)
 
     def do_step(self):
         if self.steps == 0:
@@ -60,14 +62,18 @@ class Hero(Essence):
             return res
 
     def use_ability(self, ability, map):
-        if ability is None or ability.cd_time > 0 or self.steps == 0:
+        if ability is None or ability.cd_time > 0 or self.steps == 0 or ability.ability_lvl == 0:
             return False
+        else:
+            ability.active = True
         if ability.at_time > 0:
             return True
         self.steps -= 1
         if 'invisibility' in ability.qualities:
+            ability.cd_time = ability.cool_down
             self.invisible = 1
         if 'splashDamage' in ability.qualities:
+            ability.cd_time = ability.cool_down
             dmg, rad = ability.qualities['splashDamage']
             for i in essences:
                 if i == self:
@@ -83,13 +89,15 @@ class Hero(Essence):
                     if 0 <= x <= map.width - 1 and 0 <= y <= map.height - 1:
                         map.board[y][x][1] = True
         if 'healing' in ability.qualities:
+            ability.cd_time = ability.cool_down
             self.health += ability.qualities['healing']
             self.health = min(self.health, self.maxHealth)
         if 'shield' in ability.qualities:
+            ability.cd_time = ability.cool_down
             self.shield = min(ability.qualities['shield'], self.maxHealth)
             self.maxShield = self.shield
 
-    def get_event(self, keydown_unicode, gameMap, screen):
+    def get_event(self, keydown_unicode, gameMap):
         if keydown_unicode in ['w', 'ц']:
             new_location = (self.location[0], self.location[1] - 1)
             if self.move(new_location, gameMap):
@@ -116,6 +124,8 @@ class Hero(Essence):
                 del (camera[0])
         elif keydown_unicode in ['q', 'й']:
             self.attack_mode = not self.attack_mode
+        elif keydown_unicode in ['u', 'г']:
+            self.upgrade_mode = True
 
     def render_move_zone(self, screen, map):
         x = map.left + self.location[0] * map.cell_size
@@ -151,6 +161,16 @@ class Hero(Essence):
         super().render(screen, map)
         if self.steps > 0:
             self.render_can_attack(screen, map)
+
+    def new_step(self, ability_interface):
+        for i in ability_interface.abilities:
+            cont = not(i.update_ability())
+            print("cont----", cont)
+            if cont:
+                if i.name == "3":
+                    self.invisible = 0
+                elif i.name == "2":
+                    self.shield = 0
 
     def __bytes__(self):
         info = eval(super().__bytes__().decode('utf-8'))

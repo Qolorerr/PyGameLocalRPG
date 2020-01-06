@@ -1,4 +1,3 @@
-import pygame
 from general import camera, essences, textures
 
 

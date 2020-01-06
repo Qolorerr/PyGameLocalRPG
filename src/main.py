@@ -121,9 +121,9 @@ def main():
     running = True
     gameMap = Map(100, 100)
     abilities = []
-    abilities.append(Ability('0', 'SplashDamage', 1, 8, False, 2, 1, splashDamage=(40, 5)))
-    abilities.append(Ability('1', 'Healing', 2, 8, False, 10, 1, healing=10))
-    abilities.append(Ability('2', 'Shield', 3, 8, False, 10, 2, shield=20))
+    abilities.append(Ability('0', 'SplashDamage', 1, 8, False, 2, 1, splashDamage=[40, 5]))
+    abilities.append(Ability('1', 'Healing', 2, 8, False, 3, 1, healing=20))
+    abilities.append(Ability('2', 'Shield', 3, 8, False, 12, 3, shield=20))
     abilities.append(Ability('3', 'Invisibility', 4, 8, False, 20, 2, invisibility=1))
     abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
     infoObj = pygame.display.Info()
@@ -149,10 +149,26 @@ def main():
             if client.your_hero_id == get_mainHeroID():
                 mainHeroID = get_mainHeroID()
                 if event.type == pygame.KEYDOWN:
-                    essences[mainHeroID].get_event(event.unicode, gameMap, screen)
+                    essences[mainHeroID].get_event(event.unicode, gameMap)
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    get_click(gameMap, pygame.mouse.get_pos())
-                    essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
+                    if event.button == 3:
+                        userinterface.show_info(event.pos)
+                        abilityInterface.show_info(event.pos, essences[mainHeroID])
+                    elif event.button == 1:
+                        if essences[mainHeroID].upgrade_mode:
+                            ability = abilityInterface.get_ability_on_click(event.pos)
+                            component = userinterface.get_user_interface_cell(event.pos)
+                            if ability is not None:
+                                ability.lvl_up()
+                                essences[mainHeroID].lvl_points -= 1
+                                essences[mainHeroID].upgrade_mode = False
+                            elif component is not None:
+                                userinterface.upgrade_component(component)
+                                essences[mainHeroID].lvl_points -= 1
+                                essences[mainHeroID].upgrade_mode = False
+                        else:
+                            get_click(gameMap, pygame.mouse.get_pos())
+                            essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                     timer = 0
                     essences[mainHeroID].step = 0
@@ -182,10 +198,9 @@ def main():
         info = client.get_info()
         if info is not None:
             if info is True:
-                print('----info')
                 step = True
                 timer = 1.5 * 60 * 1000
-                essences[client.your_hero_id].step_update()
+                essences[client.your_hero_id].step_update(abilityInterface)
         if step is True and (essences[get_mainHeroID()].steps == 0 or timer == 0):
             essences[client.your_hero_id].steps = 0
             timer = 0
