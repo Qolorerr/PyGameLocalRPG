@@ -84,8 +84,12 @@ class AbilityInterface:
     def render(self, screen):
         x = self.left
         y = self.window_height - self.ability_size - 2 * self.indent
-        pygame.draw.rect(screen, self.color,
-                         [x, y, self.ability_size * 4 + 5 * self.indent, self.ability_size + 2 * self.indent])
+        w = self.ability_size * 4 + 5 * self.indent
+        h = self.ability_size + 2 * self.indent
+        background = pygame.Surface((w, h), pygame.SRCALPHA)
+        background.fill((*self.color, 100))
+        screen.blit(background, (x, y))
+        pygame.draw.rect(screen, self.color, [x, y, w, h], self.indent)
         x += self.indent
         y += self.indent
         for abl in self.abilities:

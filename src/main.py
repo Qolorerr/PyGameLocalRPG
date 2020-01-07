@@ -1,15 +1,16 @@
 import pygame
+import socket
+import ctypes
+from random import shuffle
 
 from general import essences, camera, font_name_B
 from map import Map
 from hero import Hero
-import socket
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 from menu import menu, terminate
 from death import death
-import ctypes
 from client import Client
 
 
@@ -111,7 +112,7 @@ def get_mainHeroID():
 
 
 def main():
-    print("my IP---", socket.gethostbyname(socket.gethostname()))
+    print("My IP:", socket.gethostbyname(socket.gethostname()))
     client = Client()
     step = None
     while step is None:
@@ -119,8 +120,10 @@ def main():
     if client.you_main_client:
         client.first_client(int(input()))
     pygame.init()
+    your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
     ctypes.windll.user32.SetProcessDPIAware()
-    resolution = (1920, 1080)
+    u32 = ctypes.windll.user32
+    resolution = (u32.GetSystemMetrics(0), u32.GetSystemMetrics(1))
     screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
     nick = menu(screen, resolution)
     running = True
@@ -130,7 +133,7 @@ def main():
     abilities.append(Ability('1', 'Healing', 2, 8, False, 3, 1, healing=20))
     abilities.append(Ability('2', 'Shield', 3, 8, False, 12, 3, shield=20))
     abilities.append(Ability('3', 'Invisibility', 4, 8, False, 20, 2, invisibility=1))
-    abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (255, 255, 255))
+    abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (0, 0, 0))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
     essences[mainHeroID].name = nick
@@ -143,6 +146,16 @@ def main():
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
     timer = 0
     clock = pygame.time.Clock()
+    playlist = ['Ancient_Stones.wav', 'Awake.wav', 'Dragonsearch.wav', 'Secunda.wav', 'The_City_Gates.wav']
+    shuffle(playlist)
+    playlist = list(map(lambda x: '../res/sounds/' + x, playlist))
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.load(playlist[-1])
+    playlist = [playlist[-1]] + playlist[:-1]
+    pygame.mixer.music.queue(playlist[-1])
+    playlist = [playlist[-1]] + playlist[:-1]
+    pygame.mixer.music.set_endevent(pygame.USEREVENT)
+    pygame.mixer.music.play()
     if step is True:
         timer = 1.5 * 60 * 1000
     else:
@@ -160,6 +173,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 terminate()
+            if event.type == pygame.USEREVENT:
+                pygame.mixer.music.queue(playlist[-1])
+                playlist = [playlist[-1]] + playlist[:-1]
             if get_mainHeroID() != -1:
                 mainHeroID = get_mainHeroID()
                 if event.type == pygame.KEYDOWN:
@@ -217,6 +233,7 @@ def main():
             timer = 0
             client.send_msg(str(list(map(bytes, essences))))
             step = False
+            your_turn.play()
     pygame.quit()
     client.disconnect()
 
