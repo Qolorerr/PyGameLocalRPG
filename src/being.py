@@ -1,10 +1,14 @@
 from essence import Essence
+from hero import Hero
 
 
 class Being(Essence):
-    def __init__(self, health: int, damage: int, location: tuple, texture, exp: int, cost: int):
-        super().__init__(health, damage, location, texture, exp, cost)
+    def __init__(self, name, health: int, damage: int, location: tuple, texture, gold: int):
+        super().__init__(name, health, damage, location, texture, gold)
+        self.exp = 20
 
-    def received_damage(self, other_essence, type_of_attack):
-        self.health -= other_essence.damage
-        super().received_damage(other_essence, type_of_attack)
+    def give_reward(self, other_essence):
+        if type(other_essence) != Hero:
+            return
+        other_essence.level.add_exp(self.exp)
+        other_essence.gold = min(other_essence.gold + self.gold, other_essence.maxGold)

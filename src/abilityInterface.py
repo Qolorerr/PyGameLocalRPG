@@ -1,5 +1,5 @@
 import pygame
-from general import textures
+from general import textures, essences
 from infoBar import InfoBar
 
 
@@ -26,12 +26,16 @@ class Ability:
         self.qualities = kwargs
         self.init_constant()
         self.coeff = 1.1
+        self.cost = 100
 
     def init_constant(self):
-        self.NOW_MAX_LVL = 0
+        self.NOW_MAX_LVL = -1
+        self.NOT_HAVE_POINTS = -2
 
     # Increase lvl ability
-    def lvl_up(self):
+    def lvl_up(self, essence):
+        if essences[essence].level.lvl_points <= 0:
+            return self.NOT_HAVE_POINTS
         if self.ability_lvl == self.max_lvl:
             return self.NOW_MAX_LVL
         self.ability_lvl += 1
@@ -54,7 +58,7 @@ class Ability:
             self.cd_time -= 1
         if self.active:
             self.at_time += 1
-        if self.at_time > self.action_time:
+        if self.at_time >= self.action_time:
             self.at_time = 0
             return False
         else:
@@ -112,24 +116,24 @@ class AbilityInterface:
                                   str(ability.qualities["splashDamage"][1]) +
                                   ", cool down = " + str(ability.cool_down)
                                   + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.lvl_points > 0))
+                                  " and can be improved" * int(essence.level.lvl_points > 0))
             elif ability.name == "1":
                 infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
                                   " Heals you " + str(ability.qualities["healing"]) + " health"
                                   ", cool down = " + str(ability.cool_down) + ", make " + str(ability.cd_time) +
-                                  " moves to reapply" + " and can be improved" * int(essence.lvl_points > 0))
+                                  " moves to reapply" + " and can be improved" * int(essence.level.lvl_points > 0))
             elif ability.name == "2":
                 infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
                                   " Gives you a shield that blocks damage = " + str(ability.qualities["shield"]) +
                                   ", cool down = " + str(ability.cool_down)
                                   + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.lvl_points > 0))
+                                  " and can be improved" * int(essence.level.lvl_points > 0))
             elif ability.name == "3":
                 infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
                                   " Gives you complete invisibility for " + str(ability.qualities["invisibility"]) +
                                   " turns, cool down = " + str(ability.cool_down)
                                   + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.lvl_points > 0))
+                                  " and can be improved" * int(essence.level.lvl_points > 0))
             clock = pygame.time.Clock()
             infoBar.pos = pos
             self.info_name = [infoBar, clock]

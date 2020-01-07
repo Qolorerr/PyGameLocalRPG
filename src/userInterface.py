@@ -24,6 +24,9 @@ class UserInterface:
                        "gold": (self.width - 225, self.height - 100)}
         self.info_name = None
         self.max_gold = 100
+        self.components_lvl = {"health": 1,
+                               "steps": 1,
+                               "gold": 1}
 
     def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
         pygame.draw.circle(screen, color, centreCoords, 50, 1)
@@ -61,7 +64,7 @@ class UserInterface:
                          self.essence.maxShield, (175, self.height - 150, 100, 100))
         # Show count of move points
         self.circle_show(screen, (self.width - 350, self.height - 100), (53, 146, 196), self.essence.steps,
-                         self.essence.steps, self.essence.move_points, (self.width - 400, self.height - 150, 100, 100))
+                         self.essence.steps, self.essence.move_distance, (self.width - 400, self.height - 150, 100, 100))
         # Show exp and level
         self.circle_show(screen, (self.width - 100, self.height - 100), (255, 255, 255), self.essence.level.get(),
                          self.essence.level.exp, self.essence.level.max_exp,
@@ -86,27 +89,36 @@ class UserInterface:
         name = self.get_user_interface_cell(pos)
         if name is not False:
             if name == "health":
-                infoBar = InfoBar("MAX Health = " + str(self.essence.maxHealth) + ", now health = " +
-                                  str(self.essence.health) + " and can be improved" * int(self.essence.lvl_points > 0))
+                infoBar = InfoBar("Name: " + name + ", MAX Health = " + str(self.essence.maxHealth) + ", now health = " +
+                                  str(self.essence.health) + " and can be improved" * int(self.essence.level.lvl_points > 0))
             elif name == "shield":
-                infoBar = InfoBar("MAX Shield = " + str(self.essence.maxShield) + ", now shield = " +
-                                  str(self.essence.shield) + " and can be improved" * int(self.essence.lvl_points > 0))
+                infoBar = InfoBar("Name: " + name + ", MAX Shield = " + str(self.essence.maxShield) + ", now shield = " +
+                                  str(self.essence.shield) + " and can be improved" * int(self.essence.level.lvl_points > 0))
             elif name == "steps":
-                infoBar = InfoBar("MAX Steps = " + str(self.essence.move_distance) + ", now steps = " +
-                                  str(self.essence.steps) + " and can be improved" * int(self.essence.lvl_points > 0))
+                infoBar = InfoBar("Name: " + name + ", MAX Steps = " + str(self.essence.move_distance) + ", now steps = " +
+                                  str(self.essence.steps) + " and can be improved" * int(self.essence.level.lvl_points > 0))
             elif name == "level":
-                infoBar = InfoBar("Need experience for upgrade = " +
+                infoBar = InfoBar("Name: " + name + ", Need experience for upgrade = " +
                                   str(self.essence.level.max_exp - self.essence.level.exp))
             elif name == "gold":
-                infoBar = InfoBar("Gold = " + str(self.essence.gold))
+                infoBar = InfoBar("Name: " + name + ", MAX Gold = " + str(self.essence.maxGold) + ", Gold = " + str(self.essence.gold) +
+                                  " and can be improved" * int(self.essence.level.lvl_points > 0))
             clock = pygame.time.Clock()
             infoBar.pos = pos
             self.info_name = [infoBar, clock]
 
     def upgrade_component(self, component):
-        if component == 'health':
-            self.essence.maxHealth += 40
-        elif component == "steps":
+        if self.essence.level.lvl_points <= 0:
+            return None
+        if component == 'health' and self.components_lvl[component] < 5:
+            self.essence.maxHealth += 10
+            self.components_lvl[component] += 1
+        elif component == "steps" and self.components_lvl[component] < 5:
             self.essence.move_distance += 1
-        elif component == "gold":
-            self.essence.maxGold *= 2
+            self.components_lvl[component] += 1
+        elif component == "gold" and self.components_lvl[component] < 5:
+            self.essence.maxGold += 100
+            self.components_lvl[component] += 1
+        else:
+            return False
+        return True

@@ -22,8 +22,6 @@ class Hero(Essence):
         self.level = Level(100, 1.1)
         self.attack_mode = False
         self.steps = 0
-        self.move_points = move_distance
-        self.lvl_points = 1
         self.upgrade_mode = False
 
     def step_update(self, ability_interface):
@@ -42,17 +40,10 @@ class Hero(Essence):
             self.do_step()
             return res
 
-    def received_damage(self, other_essence, type_of_attack):
-        if self.shield > 0:
-            self.shield = max(0, self.shield - other_essence.damage)
-        else:
-            self.health -= other_essence.damage
-        return super().received_damage(other_essence, type_of_attack)
-
     def give_reward(self, other_essence):
         if type(other_essence) != Hero:
             return
-        other_essence.level.add_exp(self.exp)
+        other_essence.level.add_exp(self.level.exp + 100 * self.level.level)
         other_essence.gold = min(other_essence.gold + self.gold, other_essence.maxGold)
 
     def move(self, new_location, map):
@@ -75,11 +66,17 @@ class Hero(Essence):
         if 'splashDamage' in ability.qualities:
             ability.cd_time = ability.cool_down
             dmg, rad = ability.qualities['splashDamage']
-            for i in essences:
+            del_list = []
+            for ind, i in enumerate(essences):
                 if i == self:
                     continue
                 if abs(i.location[0] - self.location[0]) + abs(i.location[1] - self.location[1]) <= rad:
                     i.health -= dmg
+                    if i.alive() == i.ESSENSE_DIE:
+                        i.give_reward(self)
+                        del_list.append(ind)
+            for i in del_list:
+                del(essences[i])
             for i in range(-rad, rad + 1):
                 for j in range(-rad, rad + 1):
                     if abs(i) + abs(j) > rad:
@@ -148,6 +145,8 @@ class Hero(Essence):
                 continue
             x, y = i.location
             if abs(x - self.location[0]) + abs(y - self.location[1]) <= self.attack_range:
+                if type(i) == Hero and i.invisible == 1:
+                    continue
                 x = map.left + x * map.cell_size - map.indent
                 y = map.top + y * map.cell_size - map.indent
                 screen.blit(textures['AttackZone'].image, (x + camera[0], y + camera[1]))
@@ -156,7 +155,6 @@ class Hero(Essence):
         if self.mainHero:
             self.render_move_zone(screen, map)
         elif self.invisible > 0:
-            print(1)
             return
         super().render(screen, map)
         if self.steps > 0:
@@ -165,7 +163,6 @@ class Hero(Essence):
     def new_step(self, ability_interface):
         for i in ability_interface.abilities:
             cont = not(i.update_ability())
-            print("cont----", cont)
             if cont:
                 if i.name == "3":
                     self.invisible = 0
@@ -176,5 +173,9 @@ class Hero(Essence):
         info = eval(super().__bytes__().decode('utf-8'))
         info["type"] = "hero"
         info["invise"] = self.invisible
+        info["maxGold"] = self.maxGold
+        info["move"] = self.move_distance
+        info["lvl_points"] = self.level.lvl_points
+        info["level"] = (self.level.level, self.level.exp, self.level.max_exp)
         info = bytes(str(info), encoding='utf-8')
         return info

@@ -77,13 +77,18 @@ def on_click(coords):
     global showing_essence
     mainHeroID = get_mainHeroID()
     for i in range(len(essences)):
-        if essences[i].location == coords and essences[mainHeroID].attack_mode:
-            if essences[mainHeroID].attack(essences[i]) == essences[i].ESSENSE_DIE:
-                del(essences[i])
-            elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
-                del(essences[mainHeroID])
-        elif list(essences[i].location) == list(coords):
-            showing_essence = essences[i].essence_code
+        try:
+            if essences[i].location == coords and essences[mainHeroID].attack_mode:
+                if essences[mainHeroID].attack(essences[i]) == essences[i].ESSENSE_DIE:
+                    print('essence die kak bbI')
+                    essences[i].give_reward(essences[mainHeroID])
+                    del(essences[i])
+                elif essences[mainHeroID].alive() == essences[mainHeroID].ESSENSE_DIE:
+                    del(essences[mainHeroID])
+            elif list(essences[i].location) == list(coords):
+                showing_essence = essences[i].essence_code
+        except:
+            pass
 
 
 # Mouse click processing
@@ -143,10 +148,19 @@ def main():
     else:
         essences[get_mainHeroID()].steps = 0
     while running:
+        i = 0
+        while i < len(essences):
+            if essences[i].alive() == essences[i].ESSENSE_DIE:
+                del (essences[i])
+            else:
+                i += 1
+        mainHeroID = get_mainHeroID()
+        if mainHeroID == -1:
+            death(screen, resolution)
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 terminate()
-            if client.your_hero_id == get_mainHeroID():
+            if get_mainHeroID() != -1:
                 mainHeroID = get_mainHeroID()
                 if event.type == pygame.KEYDOWN:
                     essences[mainHeroID].get_event(event.unicode, gameMap)
@@ -159,30 +173,23 @@ def main():
                             ability = abilityInterface.get_ability_on_click(event.pos)
                             component = userinterface.get_user_interface_cell(event.pos)
                             if ability is not None:
-                                ability.lvl_up()
-                                essences[mainHeroID].lvl_points -= 1
+                                point = ability.lvl_up(mainHeroID)
+                                essences[mainHeroID].level.lvl_points -= int(point > 0)
                                 essences[mainHeroID].upgrade_mode = False
                             elif component is not None:
-                                userinterface.upgrade_component(component)
-                                essences[mainHeroID].lvl_points -= 1
+                                point = userinterface.upgrade_component(component)
+                                essences[mainHeroID].level.lvl_points -= int(point is True)
                                 essences[mainHeroID].upgrade_mode = False
                         else:
                             get_click(gameMap, pygame.mouse.get_pos())
+                            mainHeroID = get_mainHeroID()
                             essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                     timer = 0
                     essences[mainHeroID].step = 0
+        mainHeroID = get_mainHeroID()
         timer = max(0, timer - clock.tick())
         gameMap.render(screen)
-        i = 0
-        while i < len(essences):
-            if essences[i].alive() == essences[i].ESSENSE_DIE:
-                del(essences[i])
-            else:
-                i += 1
-        mainHeroID = get_mainHeroID()
-        if mainHeroID == -1:
-            death(screen, resolution)
         for i in range(len(essences)):
             if i == mainHeroID:
                 continue
@@ -200,9 +207,13 @@ def main():
             if info is True:
                 step = True
                 timer = 1.5 * 60 * 1000
-                essences[client.your_hero_id].step_update(abilityInterface)
+                if client.alive is False:
+                    death(screen, resolution)
+                client.alive = False
+                essences[mainHeroID].step_update(abilityInterface)
         if step is True and (essences[get_mainHeroID()].steps == 0 or timer == 0):
-            essences[client.your_hero_id].steps = 0
+            mainHeroID = get_mainHeroID()
+            essences[mainHeroID].steps = 0
             timer = 0
             client.send_msg(str(list(map(bytes, essences))))
             step = False

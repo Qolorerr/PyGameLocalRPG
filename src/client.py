@@ -16,6 +16,7 @@ class Client:
         self.data = None
         self.your_hero_id = int(self.recv_msg())
         self.you_main_client = bool(eval(self.recv_msg()))
+        self.alive = False
 
     def change_essences(self):
         essences.clear()
@@ -28,17 +29,26 @@ class Client:
                                      es['texture'],
                                      es["gold"]))
                 essences[-1].mainHero = es["code"] == self.your_hero_id
-            else:
-                essences.append(Being(es['health'],
+                essences[-1].move_distance = es["move"]
+                essences[-1].maxGold = es["maxGold"]
+                essences[-1].invisible = es["invise"]
+                essences[-1].level.level = es["level"][0]
+                essences[-1].level.exp = es["level"][1]
+                essences[-1].level.max_exp = es["level"][2]
+                essences[-1].level.lvl_points = es["lvl_points"]
+            elif es["type"] == "essence":
+                essences.append(Being(es["name"],
+                                      es['health'],
                                       es['damage'],
                                       es['location'],
                                       es['texture'],
                                       es['gold']))
+            if es["code"] == self.your_hero_id:
+                self.alive = True
             essences[-1].essence_code = es["code"]
             essences[-1].maxHealth = es["maxHealth"]
             essences[-1].shield = es["shield"]
             essences[-1].maxShield = es["maxShield"]
-            essences[-1].invisible = es["invise"]
 
     def send_msg(self, msg):
         # Каждое сообщение будет иметь префикс в 4 байта блинной(network byte order)

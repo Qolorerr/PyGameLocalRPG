@@ -36,8 +36,10 @@ class Essence:
 
     # launches the consequences of an attack and returns a state essence: ALIVE or DIE
     def attack(self, other_essence, type_of_attack=3):  # 3 it is MAIN_ATTACK
+        if self == other_essence:
+            return self.ESSENSE_ALIVE
         if (abs(other_essence.location[0] - self.location[0]) + abs(other_essence.location[1] - self.location[1])) <= \
-                self.attack_range and self.live == self.ESSENSE_ALIVE and self is not other_essence:
+                self.attack_range and self.live == self.ESSENSE_ALIVE:
             other_essence.received_damage(self, type_of_attack)
             self.alive()
         res = other_essence.alive()
@@ -46,15 +48,15 @@ class Essence:
 
     # Handling what we do when we take damage
     def received_damage(self, other_essence, type_of_attack):
+        if self.shield > 0:
+            self.shield = max(0, self.shield - other_essence.damage)
+        else:
+            self.health -= other_essence.damage
         if type_of_attack == self.MAIN_ATTACK and self.alive() == self.ESSENSE_ALIVE:
             self.response_to_damage(other_essence)
-            return self.ESSENSE_ALIVE
+            return other_essence.alive()
         if self.alive() == self.ESSENSE_DIE:
-            self.give_reward(other_essence)
             return self.ESSENSE_DIE
-
-    def give_reward(self, other_essence):
-        pass
 
     # Damage action
     def response_to_damage(self, other_essence):
