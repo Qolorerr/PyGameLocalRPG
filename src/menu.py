@@ -89,23 +89,48 @@ class InputBox:
 
 def menu(screen, resolution):
     mainmenu = True
-    rect = (resolution[0] // 7 * 3, resolution[1] // 11 * 6, resolution[0] // 7, resolution[1] // 11)
-    play_btn = Button(rect, (125, 125, 125), (200, 200, 200), "PLAY")
+    rect = (resolution[0] // 5 * 2, resolution[1] // 13 * 5, resolution[0] // 5, resolution[1] // 11)
+    nick_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NICK")
+    rect = (resolution[0] // 7 * 3, resolution[1] // 13 * 7, resolution[0] // 7, resolution[1] // 11)
+    create_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CREATE GAME")
+    rect = (resolution[0] // 7 * 3, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
+    connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CONNECT")
+    host = False
     while mainmenu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
+            nick_box.event_handle(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mainmenu = not play_btn.check_clicked()
+                host = create_btn.check_clicked()
+                mainmenu = not host and not connect_btn.check_clicked()
         screen.blit(textures['Logo'].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
-        play_btn.render(screen)
+        nick_box.render(screen)
+        create_btn.render(screen)
+        connect_btn.render(screen)
         pygame.display.flip()
+    if host:
+        screen.fill((0, 0, 0))
+        rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
+        players_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NUMBER OF PLAYERS")
+        rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
+        connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CREATE")
+        mainmenu = True
+        while mainmenu:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    terminate()
+                players_box.event_handle(event)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mainmenu = not connect_btn.check_clicked()
+            players_box.render(screen)
+            connect_btn.render(screen)
+            pygame.display.flip()
+        return (host, nick_box.text, players_box.text)
     screen.fill((0, 0, 0))
     rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
     ip_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "IP")
     rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
-    nick_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NICK")
-    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 7, resolution[0] // 5, resolution[1] // 11)
     connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CONNECT")
     mainmenu = True
     while mainmenu:
@@ -113,14 +138,12 @@ def menu(screen, resolution):
             if event.type == pygame.QUIT:
                 terminate()
             ip_box.event_handle(event)
-            nick_box.event_handle(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mainmenu = not connect_btn.check_clicked()
         ip_box.render(screen)
-        nick_box.render(screen)
         connect_btn.render(screen)
         pygame.display.flip()
     print(ip_box.text)
     print(nick_box.text)
     screen.fill((0, 0, 0))
-    return nick_box.text
+    return (host, nick_box.text, ip_box.text)

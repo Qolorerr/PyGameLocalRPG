@@ -112,20 +112,29 @@ def get_mainHeroID():
 
 
 def main():
-    print("My IP:", socket.gethostbyname(socket.gethostname()))
-    client = Client()
-    step = None
-    while step is None:
-        step = client.get_info()
-    if client.you_main_client:
-        client.first_client(int(input()))
     pygame.init()
     your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
     ctypes.windll.user32.SetProcessDPIAware()
     u32 = ctypes.windll.user32
     resolution = (u32.GetSystemMetrics(0), u32.GetSystemMetrics(1))
     screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
-    nick = menu(screen, resolution)
+    data = menu(screen, resolution)
+    players = 1
+    if data[0]:
+        host, nick, players = data
+    else:
+        host, nick, ip = data
+    try:
+        players = int(players)
+    except ValueError:
+        players = 1
+    print("My IP:", socket.gethostbyname(socket.gethostname()))
+    client = Client()
+    step = None
+    while step is None:
+        step = client.get_info()
+    if client.you_main_client:
+        client.first_client(players)
     running = True
     gameMap = Map(100, 100)
     abilities = []
@@ -228,7 +237,7 @@ def main():
             if info is True:
                 step = True
                 timer = 1.5 * 60 * 1000
-                if client.alive is False:
+                if get_mainHeroID() == -1:
                     death(screen, resolution)
                 client.alive = False
                 essences[mainHeroID].step_update(abilityInterface)
@@ -240,6 +249,8 @@ def main():
                 timer = 0
             client.send_msg(str(list(map(bytes, essences))))
             step = False
+            if mainHeroID == -1:
+                death(screen, resolution)
     pygame.quit()
     client.disconnect()
 
