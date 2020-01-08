@@ -36,8 +36,6 @@ class Essence:
 
     # launches the consequences of an attack and returns a state essence: ALIVE or DIE
     def attack(self, other_essence, type_of_attack=3):  # 3 it is MAIN_ATTACK
-        if self == other_essence:
-            return self.ESSENSE_ALIVE
         if (abs(other_essence.location[0] - self.location[0]) + abs(other_essence.location[1] - self.location[1])) <= \
                 self.attack_range and self.live == self.ESSENSE_ALIVE:
             other_essence.received_damage(self, type_of_attack)

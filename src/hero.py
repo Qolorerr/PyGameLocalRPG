@@ -35,7 +35,10 @@ class Hero(Essence):
         return True
 
     def attack(self, other_essence, type_of_attack=3):
-        if self.steps > 0:
+        if self == other_essence:
+            print(1)
+            return self.ESSENSE_ALIVE
+        if self.steps > 0 or type_of_attack == self.RESPONSE_TO_ATTACK:
             res = super().attack(other_essence, type_of_attack)
             self.do_step()
             return res
