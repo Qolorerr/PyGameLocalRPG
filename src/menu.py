@@ -123,4 +123,4 @@ def menu(screen, resolution):
     print(ip_box.text)
     print(nick_box.text)
     screen.fill((0, 0, 0))
-    return nick_box.text
+    return nick_box.text, ip_box.text

@@ -1,5 +1,4 @@
 import pygame
-import socket
 import ctypes
 from random import shuffle
 
@@ -112,20 +111,20 @@ def get_mainHeroID():
 
 
 def main():
-    print("My IP:", socket.gethostbyname(socket.gethostname()))
-    client = Client()
-    step = None
-    while step is None:
-        step = client.get_info()
-    if client.you_main_client:
-        client.first_client(int(input()))
     pygame.init()
     your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
     ctypes.windll.user32.SetProcessDPIAware()
     u32 = ctypes.windll.user32
     resolution = (u32.GetSystemMetrics(0), u32.GetSystemMetrics(1))
     screen = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
-    nick = menu(screen, resolution)
+    nick, ip = menu(screen, resolution)
+    client = Client(ip)
+    client.nick = nick
+    step = None
+    while step is None:
+        step = client.get_info()
+    if client.you_main_client:
+        client.first_client(1)
     running = True
     gameMap = Map(100, 100)
     abilities = []
@@ -194,7 +193,10 @@ def main():
                             component = userinterface.get_user_interface_cell(event.pos)
                             if ability is not None:
                                 point = ability.lvl_up(mainHeroID)
-                                essences[mainHeroID].level.lvl_points -= int(point > 0)
+                                if point > 0:
+                                    essences[mainHeroID].level.lvl_points -= 1
+                                    essences[mainHeroID].gold -= ability.cost
+                                    ability.cost = int(ability.cost * ability.coeff)
                                 essences[mainHeroID].upgrade_mode = False
                             elif component is not None:
                                 point = userinterface.upgrade_component(component)

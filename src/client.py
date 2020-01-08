@@ -17,6 +17,7 @@ class Client:
         self.your_hero_id = int(self.recv_msg())
         self.you_main_client = bool(eval(self.recv_msg()))
         self.alive = False
+        self.nick = None
 
     def change_essences(self):
         essences.clear()
@@ -44,7 +45,9 @@ class Client:
                                       es['texture'],
                                       es['gold']))
             if es["code"] == self.your_hero_id:
+                essences[-1].name = self.nick
                 self.alive = True
+                print("DHJLT YJHV")
             essences[-1].essence_code = es["code"]
             essences[-1].maxHealth = es["maxHealth"]
             essences[-1].shield = es["shield"]
