@@ -261,9 +261,9 @@ def main():
             if mainHeroID != -1:
                 essences[mainHeroID].steps = 0
                 timer = 0
-            client.send_msg(str(list(map(bytes, essences))))
-            step = False
-            if mainHeroID == -1:
+                client.send_msg(str(list(map(bytes, essences))))
+                step = False
+            else:
                 break
     client.send_msg(str(list(map(bytes, essences))))
     death(screen, resolution)
