@@ -15,6 +15,8 @@ class Server:
         self.listener = None
         self.end_connecting = False
         self.len_essecses = int(math.sqrt(self.map_size * 4))
+        self.ip = socket.gethostbyname(socket.gethostname())
+        print(self.ip)
 
     def create_all_coord(self):
         self.all_coord = []
@@ -103,6 +105,7 @@ class Server:
         for ind, sk in enumerate(clients):
             print('IND', ind)
             self.send_msg(str([self.essences, ind == 0]), sk)
+        self.whose_move = self.whose_move % len(clients)
 
     def new_client(self, sock):
         self.generate_new_hero('Hero1')
@@ -115,14 +118,14 @@ class Server:
 
     def start(self):
         sock_producer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock_producer.bind(('127.0.0.1', 5000))
+        sock_producer.bind((self.ip, 5000))
         sock_producer.listen(self.players)
         producers = []
 
         clients = []
         sock_consumer_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Note: different port to differentiate the clients who receive data from the one who sends messages
-        sock_consumer_listener.bind(('127.0.0.1', 5001))
+        sock_consumer_listener.bind((self.ip, 5001))
 
         rlist = [sock_producer, sock_consumer_listener]
         wlist = []
@@ -135,7 +138,7 @@ class Server:
                 self.listener = None
                 self.essences.clear()
                 self.end_connecting = False
-            r, w, err = select.select(rlist, wlist, errlist, 1)
+            r, w, err = select.select(rlist, wlist, errlist)
             for sock in r:
                 if sock == sock_producer:
                     prod, addr = sock.accept()

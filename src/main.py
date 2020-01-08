@@ -1,7 +1,10 @@
 import pygame
-import socket
 import ctypes
+import socket
+import os
+import time
 from random import shuffle
+from subprocess import Popen
 
 from general import essences, camera, font_name_B
 from map import Map
@@ -122,19 +125,27 @@ def main():
     players = 1
     if data[0]:
         host, nick, players = data
+        ip = socket.gethostbyname(socket.gethostname())
+        print(data, ip)
+        os.getcwd()
+        Popen('python new_server.py')
+        print('Server started')
+        time.sleep(1)
     else:
         host, nick, ip = data
     try:
         players = int(players)
     except ValueError:
-        players = 1
+        players = 2
     print("My IP:", socket.gethostbyname(socket.gethostname()))
-    client = Client()
+    client = Client(ip)
+    client.nick = nick
     step = None
     while step is None:
         step = client.get_info()
     if client.you_main_client:
         client.first_client(players)
+    print('Client started')
     running = True
     gameMap = Map(100, 100)
     abilities = []
@@ -178,7 +189,7 @@ def main():
                 i += 1
         mainHeroID = get_mainHeroID()
         if mainHeroID == -1:
-            death(screen, resolution)
+            break
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -203,7 +214,10 @@ def main():
                             component = userinterface.get_user_interface_cell(event.pos)
                             if ability is not None:
                                 point = ability.lvl_up(mainHeroID)
-                                essences[mainHeroID].level.lvl_points -= int(point > 0)
+                                if point > 0:
+                                    essences[mainHeroID].level.lvl_points -= 1
+                                    essences[mainHeroID].gold -= ability.cost
+                                    ability.cost = int(ability.cost * ability.coeff)
                                 essences[mainHeroID].upgrade_mode = False
                             elif component is not None:
                                 point = userinterface.upgrade_component(component)
@@ -238,9 +252,9 @@ def main():
                 step = True
                 timer = 1.5 * 60 * 1000
                 if get_mainHeroID() == -1:
-                    death(screen, resolution)
+                    break
                 client.alive = False
-                essences[mainHeroID].step_update(abilityInterface)
+                essences[get_mainHeroID()].step_update(abilityInterface)
                 your_turn.play()
         if step is True and (get_mainHeroID() == -1 or essences[get_mainHeroID()].steps == 0 or timer == 0):
             mainHeroID = get_mainHeroID()
@@ -250,7 +264,9 @@ def main():
             client.send_msg(str(list(map(bytes, essences))))
             step = False
             if mainHeroID == -1:
-                death(screen, resolution)
+                break
+    client.send_msg(str(list(map(bytes, essences))))
+    death(screen, resolution)
     pygame.quit()
     client.disconnect()
 
