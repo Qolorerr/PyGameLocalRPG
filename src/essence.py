@@ -9,7 +9,7 @@ class Essence:
                  location: list,
                  texture: int,
                  gold: int,
-                 attack_range: int = 1,
+                 attack_range: int = 5,
                  move_distance: int = 1):
         self.name = name
         self.health = health

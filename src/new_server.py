@@ -105,7 +105,7 @@ class Server:
         for ind, sk in enumerate(clients):
             print('IND', ind)
             self.send_msg(str([self.essences, ind == 0]), sk)
-        self.whose_move = self.whose_move % len(clients)
+        self.whose_move = self.whose_move % self.listener
 
     def new_client(self, sock):
         self.generate_new_hero('Hero1')
@@ -118,12 +118,14 @@ class Server:
 
     def start(self):
         sock_producer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock_producer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock_producer.bind((self.ip, 5000))
         sock_producer.listen(self.players)
         producers = []
 
         clients = []
         sock_consumer_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock_consumer_listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # Note: different port to differentiate the clients who receive data from the one who sends messages
         sock_consumer_listener.bind((self.ip, 5001))
 

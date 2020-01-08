@@ -130,7 +130,6 @@ def main():
         os.getcwd()
         Popen('python new_server.py')
         print('Server started')
-        time.sleep(1)
     else:
         host, nick, ip = data
     try:

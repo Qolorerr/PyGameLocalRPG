@@ -84,7 +84,6 @@ class Client:
         r, w, err = select.select([self.sock], [self.sock], [], 0.1)
         if r != []:
             data = self.recv_msg()
-            print('data', data)
             if data is None:
                 return
             data = eval(data.decode('utf-8'))
