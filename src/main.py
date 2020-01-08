@@ -171,8 +171,12 @@ def main():
         if mainHeroID == -1:
             death(screen, resolution)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
+            if event.type == pygame.QUIT:
                 terminate()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
+                mainHeroID = get_mainHeroID()
+                if mainHeroID != -1:
+                    del(essences[mainHeroID])
             if event.type == pygame.USEREVENT:
                 pygame.mixer.music.queue(playlist[-1])
                 playlist = [playlist[-1]] + playlist[:-1]
@@ -204,20 +208,21 @@ def main():
                     timer = 0
                     essences[mainHeroID].step = 0
         mainHeroID = get_mainHeroID()
-        timer = max(0, timer - clock.tick())
-        gameMap.render(screen)
-        for i in range(len(essences)):
-            if i == mainHeroID:
-                continue
-            essences[i].render(screen, gameMap)
-        essences[mainHeroID].render(screen, gameMap)
-        if essences[mainHeroID].attack_mode:
-            essences[mainHeroID].render_can_attack(screen, gameMap)
-        abilityInterface.render(screen)
-        userinterface.essence = essences[mainHeroID]
-        userinterface.render(screen, timer)
-        show_essence_info(screen)
-        pygame.display.flip()
+        if mainHeroID != -1:
+            timer = max(0, timer - clock.tick())
+            gameMap.render(screen)
+            for i in range(len(essences)):
+                if i == mainHeroID:
+                    continue
+                essences[i].render(screen, gameMap)
+            essences[mainHeroID].render(screen, gameMap)
+            if essences[mainHeroID].attack_mode:
+                essences[mainHeroID].render_can_attack(screen, gameMap)
+            abilityInterface.render(screen)
+            userinterface.essence = essences[mainHeroID]
+            userinterface.render(screen, timer)
+            show_essence_info(screen)
+            pygame.display.flip()
         info = client.get_info()
         if info is not None:
             if info is True:
@@ -227,13 +232,14 @@ def main():
                     death(screen, resolution)
                 client.alive = False
                 essences[mainHeroID].step_update(abilityInterface)
-        if step is True and (essences[get_mainHeroID()].steps == 0 or timer == 0):
+                your_turn.play()
+        if step is True and (get_mainHeroID() == -1 or essences[get_mainHeroID()].steps == 0 or timer == 0):
             mainHeroID = get_mainHeroID()
-            essences[mainHeroID].steps = 0
-            timer = 0
+            if mainHeroID != -1:
+                essences[mainHeroID].steps = 0
+                timer = 0
             client.send_msg(str(list(map(bytes, essences))))
             step = False
-            your_turn.play()
     pygame.quit()
     client.disconnect()
 
