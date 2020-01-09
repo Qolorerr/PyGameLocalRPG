@@ -129,13 +129,15 @@ class CheckBox:
 
 
 def get_data_from_configs():
-    f = open('../res/configs.cfg', 'r')
-    configs = dict()
-    for line in f:
-        key, value = line[:-1].split(': ')
-        configs[key] = value
-    f.close()
-
+    try:
+        f = open('../res/configs.cfg', 'r')
+        configs = dict()
+        for line in f:
+            key, value = line[:-1].split(': ')
+            configs[key] = value
+        f.close()
+    except FileNotFoundError:
+        configs = dict()
     return configs
 
 
