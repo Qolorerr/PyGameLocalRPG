@@ -12,7 +12,7 @@ from hero import Hero
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
-from menu import menu, terminate
+from menu import menu, terminate, get_data_from_configs
 from death import death
 from client import Client
 
@@ -116,7 +116,6 @@ def get_mainHeroID():
 
 def main():
     pygame.init()
-    your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
     ctypes.windll.user32.SetProcessDPIAware()
     u32 = ctypes.windll.user32
     resolution = (u32.GetSystemMetrics(0), u32.GetSystemMetrics(1))
@@ -165,16 +164,25 @@ def main():
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
     timer = 0
     clock = pygame.time.Clock()
+    configs = get_data_from_configs()
+    music = True
+    if 'music' in configs:
+        music = eval(configs['music'])
+    sounds = True
+    if 'sounds' in configs:
+        sounds = eval(configs['sounds'])
     playlist = ['Ancient_Stones.wav', 'Awake.wav', 'Dragonsearch.wav', 'Secunda.wav', 'The_City_Gates.wav']
     shuffle(playlist)
     playlist = list(map(lambda x: '../res/sounds/' + x, playlist))
-    pygame.mixer.music.set_volume(0.1)
-    pygame.mixer.music.load(playlist[-1])
-    playlist = [playlist[-1]] + playlist[:-1]
-    pygame.mixer.music.queue(playlist[-1])
-    playlist = [playlist[-1]] + playlist[:-1]
-    pygame.mixer.music.set_endevent(pygame.USEREVENT)
-    pygame.mixer.music.play()
+    if music:
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.load(playlist[-1])
+        playlist = [playlist[-1]] + playlist[:-1]
+        pygame.mixer.music.queue(playlist[-1])
+        playlist = [playlist[-1]] + playlist[:-1]
+        pygame.mixer.music.set_endevent(pygame.USEREVENT)
+        pygame.mixer.music.play()
+    your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
     if step is True:
         timer = 1.5 * 60 * 1000
     else:
@@ -196,7 +204,7 @@ def main():
                 mainHeroID = get_mainHeroID()
                 if mainHeroID != -1:
                     del(essences[mainHeroID])
-            if event.type == pygame.USEREVENT:
+            if music and event.type == pygame.USEREVENT:
                 pygame.mixer.music.queue(playlist[-1])
                 playlist = [playlist[-1]] + playlist[:-1]
             if get_mainHeroID() != -1:
@@ -254,7 +262,8 @@ def main():
                     break
                 client.alive = False
                 essences[get_mainHeroID()].step_update(abilityInterface)
-                your_turn.play()
+                if sounds:
+                    your_turn.play()
         if step is True and (get_mainHeroID() == -1 or essences[get_mainHeroID()].steps == 0 or timer == 0):
             mainHeroID = get_mainHeroID()
             if mainHeroID != -1:
