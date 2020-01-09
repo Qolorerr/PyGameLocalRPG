@@ -22,15 +22,18 @@ class Button:
         self.text = text
         self.font = pygame.font.Font(font_name_B, 40, bold=True)
 
-    def check_clicked(self):
-        mouse = pygame.mouse.get_pos()
-        if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
-            return True
-        return False
+    def event_handle(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse = pygame.mouse.get_pos()
+            if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
+                    self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
+                return True
+            return False
 
     def render(self, screen):
         mouse = pygame.mouse.get_pos()
-        if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
+        if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
+                self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
             pygame.draw.rect(screen, self.color_hover, self.rect, 5)
         else:
             pygame.draw.rect(screen, self.color, self.rect)
@@ -52,13 +55,18 @@ class InputBox:
         else:
             self.color_hover = color_hover
         self.text = text
+        self.setup = True
         self.font = pygame.font.Font(font_name_B, 40, bold=True)
         self.active = False
 
     def event_handle(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse = pygame.mouse.get_pos()
-            if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
+            if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
+                    self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
+                if self.setup:
+                    self.text = ''
+                    self.setup = False
                 self.active = True
                 return
             self.active = False
@@ -106,7 +114,8 @@ class CheckBox:
     def event_handle(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse = pygame.mouse.get_pos()
-            if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
+            if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
+                    self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
                 self.active = not self.active
 
     def render(self, screen):
@@ -158,8 +167,7 @@ def settings(screen, resolution):
                 terminate()
             music_box.event_handle(event)
             sounds_box.event_handle(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                setting = not save_btn.check_clicked()
+            setting = not save_btn.event_handle(event)
         screen.fill((0, 0, 0))
         music_box.render(screen)
         sounds_box.render(screen)
@@ -187,10 +195,9 @@ def menu(screen, resolution):
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 terminate()
             nick_box.event_handle(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                host = create_btn.check_clicked()
-                mainmenu = not host and not connect_btn.check_clicked()
-                setting = settings_btn.check_clicked()
+            host = create_btn.event_handle(event)
+            mainmenu = not host and not connect_btn.event_handle(event)
+            setting = settings_btn.event_handle(event)
         screen.blit(textures['Logo'].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
         nick_box.render(screen)
         create_btn.render(screen)
@@ -212,12 +219,11 @@ def menu(screen, resolution):
                 if event.type == pygame.QUIT:
                     terminate()
                 players_box.event_handle(event)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    mainmenu = not connect_btn.check_clicked()
+                mainmenu = not connect_btn.event_handle(event)
             players_box.render(screen)
             connect_btn.render(screen)
             pygame.display.flip()
-        return (host, nick_box.text, players_box.text)
+        return host, nick_box.text, players_box.text
     screen.fill((0, 0, 0))
     rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
     ip_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "IP")
@@ -229,12 +235,11 @@ def menu(screen, resolution):
             if event.type == pygame.QUIT:
                 terminate()
             ip_box.event_handle(event)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mainmenu = not connect_btn.check_clicked()
+            mainmenu = not connect_btn.event_handle(event)
         ip_box.render(screen)
         connect_btn.render(screen)
         pygame.display.flip()
     print(ip_box.text)
     print(nick_box.text)
     screen.fill((0, 0, 0))
-    return (host, nick_box.text, ip_box.text)
+    return host, nick_box.text, ip_box.text
