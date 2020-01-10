@@ -148,6 +148,39 @@ def set_data_to_configs(configs: dict):
     f.close()
 
 
+def rules(screen, resolution):
+    rule = True
+    x, y = resolution[0] // 15, resolution[1] // 13
+    font = pygame.font.Font(font_name_B, 40, bold=True)
+    text = ["""'WASD' - MOVING                      'q' - ATTACK MODE"""]
+    text += ["""'p' - END TURN                       'u' - UPGRADE MODE"""]
+    text += ["""'F4' - EXIT"""]
+    text += [""""""]
+    text += ["""CLICK ON ENEMY TO GET INFO ABOUT HIM"""]
+    text += ["""CLICK ON ENEMY IN ATTACK MODE AND ATTACK HIM (IF IT HIGHLIGHT)"""]
+    text += [""""""]
+    text += ["""CLICK ON ABILITY OR INDICATOR (HEALTH, SHIELD, STEPS, GOLD) IN UPGRADE MODE TO UPGRADE IT"""]
+    text += ["""NEED LEVEL POINTS (YOU GET 1 LEVEL POINT PER LEVEL) AND GOLD"""]
+    rect = (resolution[0] // 7 * 5, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
+    exit_btn = Button(rect, (125, 125, 125), (200, 200, 200), "EXIT")
+    while rule:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
+                terminate()
+            rule = not exit_btn.event_handle(event)
+        screen.fill((0, 0, 0))
+        for line in text:
+            text_rend = font.render(line, 1, (200, 200, 200))
+            rect = text_rend.get_rect()
+            rect.left = x
+            rect.top = y
+            y += rect.height + 10
+            screen.blit(text_rend, rect)
+        y = resolution[1] // 13
+        exit_btn.render(screen)
+        pygame.display.flip()
+
+
 def settings(screen, resolution):
     configs = get_data_from_configs()
     music = True
@@ -184,14 +217,17 @@ def menu(screen, resolution):
     mainmenu = True
     rect = (resolution[0] // 5 * 2, resolution[1] // 13 * 5, resolution[0] // 5, resolution[1] // 11)
     nick_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NICK")
-    rect = (resolution[0] // 7 * 3, resolution[1] // 13 * 7, resolution[0] // 7, resolution[1] // 11)
+    rect = (resolution[0] // 7 * 2, resolution[1] // 13 * 7, resolution[0] // 7, resolution[1] // 11)
     create_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CREATE GAME")
-    rect = (resolution[0] // 7 * 3, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
+    rect = (resolution[0] // 7 * 4, resolution[1] // 13 * 7, resolution[0] // 7, resolution[1] // 11)
     connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CONNECT")
-    rect = (resolution[0] // 7 * 3, resolution[1] // 13 * 11, resolution[0] // 7, resolution[1] // 11)
+    rect = (resolution[0] // 7 * 2, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
     settings_btn = Button(rect, (125, 125, 125), (200, 200, 200), "SETTINGS")
+    rect = (resolution[0] // 7 * 4, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
+    rules_btn = Button(rect, (125, 125, 125), (200, 200, 200), "RULES")
     host = False
     setting = False
+    rule = False
     while mainmenu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
@@ -200,15 +236,21 @@ def menu(screen, resolution):
             host = create_btn.event_handle(event)
             mainmenu = not host and not connect_btn.event_handle(event)
             setting = settings_btn.event_handle(event)
+            rule = rules_btn.event_handle(event)
+        screen.fill((0, 0, 0))
         screen.blit(textures['Logo'].image, ((resolution[0] - 644) // 2, resolution[1] // 11 * 2))
         nick_box.render(screen)
         create_btn.render(screen)
         connect_btn.render(screen)
         settings_btn.render(screen)
+        rules_btn.render(screen)
         pygame.display.flip()
         if setting:
             settings(screen, resolution)
             setting = False
+        if rule:
+            rules(screen, resolution)
+            rule = False
     if host:
         screen.fill((0, 0, 0))
         rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
