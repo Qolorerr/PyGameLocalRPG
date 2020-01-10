@@ -52,7 +52,8 @@ class Hero(Essence):
     def move(self, new_location, map):
         if self.steps > 0:
             res = super().move(new_location, map)
-            self.do_step()
+            if res:
+                self.do_step()
             return res
 
     def use_ability(self, ability, map):
@@ -62,7 +63,7 @@ class Hero(Essence):
             ability.active = True
         if ability.at_time > 0:
             return True
-        self.steps -= 1
+        self.do_step()
         if 'invisibility' in ability.qualities:
             ability.cd_time = ability.cool_down
             self.invisible = 1
@@ -125,6 +126,7 @@ class Hero(Essence):
         elif keydown_unicode in ['q', 'й']:
             self.attack_mode = not self.attack_mode
         elif keydown_unicode in ['u', 'г']:
+            print(self.name)
             self.upgrade_mode = True
 
     def render_move_zone(self, screen, map):

@@ -30,14 +30,14 @@ class Button:
                 return True
             return False
 
-    def render(self, screen):
+    def render(self, screen, text_color=(0, 0, 0)):
         mouse = pygame.mouse.get_pos()
         if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
                 self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
             pygame.draw.rect(screen, self.color_hover, self.rect, 5)
         else:
             pygame.draw.rect(screen, self.color, self.rect)
-        text = self.font.render(self.text, 1, (0, 0, 0))
+        text = self.font.render(self.text, 1, text_color)
         x = self.rect[0] + self.rect[2] // 2 - text.get_width() // 2
         y = self.rect[1] + self.rect[3] // 2 - text.get_height() // 2
         screen.blit(text, (x, y))

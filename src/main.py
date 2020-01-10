@@ -12,7 +12,7 @@ from hero import Hero
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
-from menu import menu, terminate, get_data_from_configs
+from menu import menu, terminate, get_data_from_configs, Button
 from death import death
 from client import Client
 
@@ -162,6 +162,12 @@ def main():
     camera.append(cameraX)
     camera.append(cameraY)
     userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
+    rect = (resolution[0] // 9 * 8 - 5, 5, resolution[0] // 9, resolution[1] // 15)
+    end_turn_btn = Button(rect, (0, 0, 0), (200, 200, 200), "END TURN")
+    rect = (resolution[0] // 4, resolution[1] // 18 * 17, resolution[0] // 10, resolution[1] // 18)
+    upgrade_btn = Button(rect, (0, 0, 0), (200, 200, 200), "UPGRADE")
+    rect = (resolution[0] // 4 * 3 - resolution[0] // 10, resolution[1] // 18 * 17, resolution[0] // 10, resolution[1] // 18)
+    attack_btn = Button(rect, (0, 0, 0), (200, 200, 200), "ATTACK MODE")
     timer = 0
     clock = pygame.time.Clock()
     configs = get_data_from_configs()
@@ -207,8 +213,16 @@ def main():
             if music and event.type == pygame.USEREVENT:
                 pygame.mixer.music.queue(playlist[-1])
                 playlist = [playlist[-1]] + playlist[:-1]
-            if get_mainHeroID() != -1:
-                mainHeroID = get_mainHeroID()
+            mainHeroID = get_mainHeroID()
+            upgrade = upgrade_btn.event_handle(event)
+            if upgrade:
+                essences[mainHeroID].get_event('u', gameMap)
+                continue
+            attack = attack_btn.event_handle(event)
+            if attack:
+                essences[mainHeroID].get_event('q', gameMap)
+                continue
+            if mainHeroID != -1:
                 if event.type == pygame.KEYDOWN:
                     essences[mainHeroID].get_event(event.unicode, gameMap)
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -234,7 +248,8 @@ def main():
                             get_click(gameMap, pygame.mouse.get_pos())
                             mainHeroID = get_mainHeroID()
                             essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                end_turn = end_turn_btn.event_handle(event)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p or end_turn:
                     timer = 0
                     essences[mainHeroID].step = 0
         mainHeroID = get_mainHeroID()
@@ -249,6 +264,9 @@ def main():
             if essences[mainHeroID].attack_mode:
                 essences[mainHeroID].render_can_attack(screen, gameMap)
             abilityInterface.render(screen)
+            end_turn_btn.render(screen, (200, 200, 200))
+            upgrade_btn.render(screen, (200, 200, 200))
+            attack_btn.render(screen, (200, 200, 200))
             userinterface.essence = essences[mainHeroID]
             userinterface.render(screen, timer)
             show_essence_info(screen)
