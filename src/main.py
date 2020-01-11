@@ -2,7 +2,6 @@ import pygame
 import ctypes
 import socket
 import os
-import time
 from random import shuffle
 from subprocess import Popen
 
@@ -127,7 +126,7 @@ def main():
         ip = socket.gethostbyname(socket.gethostname())
         print(data, ip)
         os.getcwd()
-        Popen('python new_server.py')
+        Popen('new_server.exe')
         print('Server started')
     else:
         host, nick, ip = data
@@ -214,6 +213,8 @@ def main():
                 pygame.mixer.music.queue(playlist[-1])
                 playlist = [playlist[-1]] + playlist[:-1]
             mainHeroID = get_mainHeroID()
+            if essences[mainHeroID].steps == 0:
+                continue
             upgrade = upgrade_btn.event_handle(event)
             if upgrade:
                 essences[mainHeroID].get_event('u', gameMap)
@@ -247,6 +248,8 @@ def main():
                         else:
                             get_click(gameMap, pygame.mouse.get_pos())
                             mainHeroID = get_mainHeroID()
+                            if mainHeroID == -1:
+                                continue
                             essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
                 end_turn = end_turn_btn.event_handle(event)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p or end_turn:
