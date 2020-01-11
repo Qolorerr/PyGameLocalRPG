@@ -11,6 +11,9 @@ class Texture:
         self.size = (int(oldSize[0] * k), int(oldSize[1] * k))
         self.image = pygame.transform.scale(self.image, self.size)
 
+    def resize(self, size):
+        self.image = pygame.transform.scale(self.image, size)
+
 
 # List of textures
 textures = {'Grass': Texture('grass.jpg'),
@@ -26,7 +29,10 @@ textures = {'Grass': Texture('grass.jpg'),
             'Shield': Texture('montagne.png', 77),
             'Logo': Texture('logo.png', 646),
             'Crack': Texture('cracking.png'),
-            'Death': Texture('death.jpg', 342)}
+            'Death': Texture('death.jpg', 342),
+            'HealthLogo': Texture('health.png', 102),
+            'DamageLogo': Texture('damage.png', 102),
+            'ShieldLogo': Texture('shield.png', 102)}
 
 essences = []
 

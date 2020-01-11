@@ -5,7 +5,7 @@ import os
 from random import shuffle
 from subprocess import Popen
 
-from general import essences, camera, font_name_B
+from general import essences, camera, font_name_B, textures
 from map import Map
 from hero import Hero
 from abilityInterface import Ability
@@ -19,7 +19,7 @@ from client import Client
 showing_essence = None
 
 
-def filling_bar(screen, color, rect: tuple, value, maxValue):
+def filling_bar(screen, color, rect: tuple, value, maxValue, texture_name: str = ''):
     pygame.draw.rect(screen, (0, 0, 0), rect, 1)
     k = value / maxValue
     indent = 1
@@ -30,6 +30,15 @@ def filling_bar(screen, color, rect: tuple, value, maxValue):
     rect2[3] -= 2 * indent
     rect2 = tuple(rect2)
     pygame.draw.rect(screen, color, rect2)
+    if texture_name in textures:
+        texture_indent = 4
+        texture = textures[texture_name]
+        w = h = rect2[3] - 2 * texture_indent
+        texture.resize((w, h))
+        texture = texture.image
+        x = rect[0] + (rect[2] - w) // 2
+        y = rect2[1] + texture_indent
+        screen.blit(texture, (x, y))
     font = pygame.font.Font(font_name_B, 20, bold=True)
     text = font.render(str(value), 1, (255, 255, 255))
     screen.blit(text, (rect[0] + rect[2] // 2 - text.get_width() // 2, rect[1] + rect[3] // 2 - text.get_height() // 2))
@@ -55,15 +64,15 @@ def show_essence_info(screen):
     barwidth = width - indent * 2
     barheight = (height - 5 * indent) // 4
     filling_bar(screen, (219, 77, 66),
-                (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage)
+                (x + indent, y + 2 * barheight + 3 * indent, barwidth, barheight), damage, damage, 'DamageLogo')
     font = pygame.font.Font(font_name_B, 40, bold=True)
     maxHealth = essences[essence].maxHealth
     filling_bar(screen, (219, 77, 66),
-                (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth)
+                (x + indent, y + barheight + 2 * indent, barwidth, barheight), health, maxHealth, 'HealthLogo')
     shield = essences[essence].shield
     maxShield = essences[essence].maxShield
     filling_bar(screen, (81, 119, 179),
-                (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield)
+                (x + indent, y + 3 * barheight + 4 * indent, barwidth, barheight), shield, maxShield, 'ShieldLogo')
     if type(essences[essence]) == Hero:
         text = essences[essence].name + ' [' + str(essences[essence].level.get()) + ']'
     else:
@@ -183,8 +192,6 @@ def main():
         pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.load(playlist[-1])
         playlist = [playlist[-1]] + playlist[:-1]
-        pygame.mixer.music.queue(playlist[-1])
-        playlist = [playlist[-1]] + playlist[:-1]
         pygame.mixer.music.set_endevent(pygame.USEREVENT)
         pygame.mixer.music.play()
     your_turn = pygame.mixer.Sound('../res/sounds/YourTurn.wav')
@@ -210,7 +217,8 @@ def main():
                 if mainHeroID != -1:
                     del(essences[mainHeroID])
             if music and event.type == pygame.USEREVENT:
-                pygame.mixer.music.queue(playlist[-1])
+                pygame.mixer.music.load(playlist[-1])
+                pygame.mixer.music.play()
                 playlist = [playlist[-1]] + playlist[:-1]
             mainHeroID = get_mainHeroID()
             if essences[mainHeroID].steps == 0:

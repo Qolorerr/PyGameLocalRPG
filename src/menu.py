@@ -35,6 +35,7 @@ class Button:
         if (self.rect[0] <= mouse[0] <= self.rect[0] + self.rect[2]) and (
                 self.rect[1] <= mouse[1] <= self.rect[1] + self.rect[3]):
             pygame.draw.rect(screen, self.color_hover, self.rect, 5)
+            text_color = tuple(map(lambda x: 255 - x, text_color))
         else:
             pygame.draw.rect(screen, self.color, self.rect)
         text = self.font.render(self.text, 1, text_color)
@@ -82,6 +83,7 @@ class InputBox:
                 self.text = self.text[:-1]
             elif self.active:
                 self.text += event.unicode
+                self.text = self.text[:20]
 
     def render(self, screen):
         if self.active:
@@ -213,6 +215,54 @@ def settings(screen, resolution):
     set_data_to_configs(configs)
 
 
+def connecting(screen, resolution):
+    connect = True
+    screen.fill((0, 0, 0))
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
+    ip_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "IP")
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
+    connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CONNECT")
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 8, resolution[0] // 5, resolution[1] // 11)
+    return_btn = Button(rect, (125, 125, 125), (200, 200, 200), "RETURN")
+    while connect:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
+                terminate()
+            ip_box.event_handle(event)
+            connect = not connect_btn.event_handle(event)
+            if return_btn.event_handle(event):
+                return None
+        ip_box.render(screen)
+        connect_btn.render(screen)
+        return_btn.render(screen)
+        pygame.display.flip()
+    return ip_box.text
+
+
+def creating(screen, resolution):
+    create = True
+    screen.fill((0, 0, 0))
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
+    players_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NUMBER OF PLAYERS")
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
+    create_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CREATE")
+    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 8, resolution[0] // 5, resolution[1] // 11)
+    return_btn = Button(rect, (125, 125, 125), (200, 200, 200), "RETURN")
+    while create:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
+                terminate()
+            players_box.event_handle(event)
+            create = not create_btn.event_handle(event)
+            if return_btn.event_handle(event):
+                return None
+        players_box.render(screen)
+        create_btn.render(screen)
+        return_btn.render(screen)
+        pygame.display.flip()
+    return players_box.text
+
+
 def menu(screen, resolution):
     mainmenu = True
     rect = (resolution[0] // 5 * 2, resolution[1] // 13 * 5, resolution[0] // 5, resolution[1] // 11)
@@ -225,7 +275,8 @@ def menu(screen, resolution):
     settings_btn = Button(rect, (125, 125, 125), (200, 200, 200), "SETTINGS")
     rect = (resolution[0] // 7 * 4, resolution[1] // 13 * 9, resolution[0] // 7, resolution[1] // 11)
     rules_btn = Button(rect, (125, 125, 125), (200, 200, 200), "RULES")
-    host = False
+    create = False
+    connect = False
     setting = False
     rule = False
     while mainmenu:
@@ -233,8 +284,8 @@ def menu(screen, resolution):
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 terminate()
             nick_box.event_handle(event)
-            host = create_btn.event_handle(event)
-            mainmenu = not host and not connect_btn.event_handle(event)
+            create = create_btn.event_handle(event)
+            connect = connect_btn.event_handle(event)
             setting = settings_btn.event_handle(event)
             rule = rules_btn.event_handle(event)
         screen.fill((0, 0, 0))
@@ -245,45 +296,19 @@ def menu(screen, resolution):
         settings_btn.render(screen)
         rules_btn.render(screen)
         pygame.display.flip()
+        if create:
+            players = creating(screen, resolution)
+            if players is not None:
+                return True, nick_box.text, players
+            create = False
+        if connect:
+            ip = connecting(screen, resolution)
+            if ip is not None:
+                return False, nick_box.text, ip
+            connect = False
         if setting:
             settings(screen, resolution)
             setting = False
         if rule:
             rules(screen, resolution)
             rule = False
-    if host:
-        screen.fill((0, 0, 0))
-        rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
-        players_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "NUMBER OF PLAYERS")
-        rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
-        connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CREATE")
-        mainmenu = True
-        while mainmenu:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    terminate()
-                players_box.event_handle(event)
-                mainmenu = not connect_btn.event_handle(event)
-            players_box.render(screen)
-            connect_btn.render(screen)
-            pygame.display.flip()
-        return host, nick_box.text, players_box.text
-    screen.fill((0, 0, 0))
-    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 3, resolution[0] // 5, resolution[1] // 11)
-    ip_box = InputBox(rect, (125, 125, 125), (200, 200, 200), "IP")
-    rect = (resolution[0] // 5 * 2, resolution[1] // 11 * 5, resolution[0] // 5, resolution[1] // 11)
-    connect_btn = Button(rect, (125, 125, 125), (200, 200, 200), "CONNECT")
-    mainmenu = True
-    while mainmenu:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            ip_box.event_handle(event)
-            mainmenu = not connect_btn.event_handle(event)
-        ip_box.render(screen)
-        connect_btn.render(screen)
-        pygame.display.flip()
-    print(ip_box.text)
-    print(nick_box.text)
-    screen.fill((0, 0, 0))
-    return host, nick_box.text, ip_box.text
