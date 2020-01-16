@@ -78,9 +78,7 @@ class Hero(Essence):
                     i.health -= dmg
                     if i.alive() == i.ESSENSE_DIE:
                         i.give_reward(self)
-                        del_list.append(ind)
-            for i in del_list:
-                del(essences[i])
+                        del(essences[ind])
             for i in range(-rad, rad + 1):
                 for j in range(-rad, rad + 1):
                     if abs(i) + abs(j) > rad:

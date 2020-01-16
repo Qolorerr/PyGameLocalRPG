@@ -17,6 +17,7 @@ class Server:
         self.len_essecses = int(math.sqrt(self.map_size * 4))
         self.ip = socket.gethostbyname(socket.gethostname())
         print(self.ip)
+        self.end_session = False
 
     def create_all_coord(self):
         self.all_coord = []
@@ -46,6 +47,23 @@ class Server:
                 "type": 'essence'}
         self.essences.append(info)
 
+    def being_step(self, ind):
+        x, y = self.essences[ind]["location"]
+        step = []
+        for i in range(max(0, x - 3), x + 3):
+            for j in range(max(0, y - 3), y + 3):
+                st = True
+                for es in self.essences:
+                    if es["location"] == (i, j):
+                        st = False
+                        if es["type"] == "hero":
+                            es["health"] -= self.essences[ind]["damage"]
+
+                if st:
+                    step.append(tuple([i, j]))
+        if step:
+            self.essences[ind]["location"] = random.choice(step)
+
     def generate_essence_code(self):
         A = list(map(lambda x: x["code"], self.essences))
         if self.essences == []:
@@ -56,6 +74,10 @@ class Server:
     def server_step(self):
         for i in range(self.len_essecses - len(self.essences)):
             self.generate_new_being('Being1')
+        for ind, i in enumerate(self.essences):
+            if i["type"] == "essence":
+                self.being_step(ind)
+                print("step being")
 
     def generate_new_hero(self, texture):
         info = {"name": "Lox",
@@ -117,6 +139,7 @@ class Server:
         self.listener = int(self.recv_msg(sock).decode('utf-8'))
 
     def start(self):
+        print("Good")
         sock_producer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_producer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock_producer.bind((self.ip, 5000))
@@ -133,14 +156,19 @@ class Server:
         wlist = []
         errlist = []
         while True:
+            print(self.essences)
             if self.end_connecting is False and self.listener == len(rlist) - 2:
                 self.was_connected_all_clients(rlist[2::])
                 self.end_connecting = True
             if len(rlist) <= 2:
+                if self.end_session:
+                    rlist[0].close()
+                    rlist[1].close()
+                    break
                 self.listener = None
                 self.essences.clear()
                 self.end_connecting = False
-            r, w, err = select.select(rlist, wlist, errlist)
+            r, w, err = select.select(rlist, wlist, errlist, 1)
             for sock in r:
                 if sock == sock_producer:
                     prod, addr = sock.accept()
@@ -149,6 +177,7 @@ class Server:
                     if self.listener is None:
                         rlist.append(prod)
                         self.setting(prod)
+                        self.end_session = True
                     elif self.listener > len(rlist) - 2:
                         rlist.append(prod)
                 elif sock == sock_consumer_listener:
@@ -161,13 +190,13 @@ class Server:
                         info = self.recv_msg(sock)
                         out_buffer = list(map(lambda x: eval(x.decode('utf-8')), eval(info)))
                     except:
-                        print("gg")
                         del(rlist[rlist.index(sock)])
                         out_buffer = []
                     if out_buffer != []:
                         self.essences = out_buffer
                         if self.whose_move == 0:
                             self.server_step()
+                            print("make_step")
                         for ind, s in enumerate(rlist[2::]):
                             if ind == self.whose_move:
                                 change = True

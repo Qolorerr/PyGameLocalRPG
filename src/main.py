@@ -135,7 +135,7 @@ def main():
         ip = socket.gethostbyname(socket.gethostname())
         print(data, ip)
         os.getcwd()
-        Popen('new_server.exe')
+        Popen("python new_server.py")
         print('Server started')
     else:
         host, nick, ip = data
@@ -221,7 +221,7 @@ def main():
                 pygame.mixer.music.play()
                 playlist = [playlist[-1]] + playlist[:-1]
             mainHeroID = get_mainHeroID()
-            if essences[mainHeroID].steps == 0:
+            if mainHeroID == -1 or essences[mainHeroID].steps == 0:
                 continue
             upgrade = upgrade_btn.event_handle(event)
             if upgrade:
@@ -306,6 +306,4 @@ def main():
     death(screen, resolution)
     pygame.quit()
     client.disconnect()
-
-
 main()
