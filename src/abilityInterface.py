@@ -6,13 +6,12 @@ from infoBar import InfoBar
 # Class hero's ability
 class Ability:
     def __init__(self, name: str,
-                 texture: int,
+                 texture: str,
                  ability_code: int,
                  max_lvl: int,
                  active: bool,
                  cool_down: int,
-                 action_time: int,
-                 **kwargs: dict):  # Qualities of ability, for example: damage 10, healing 100 or others
+                 action_time: int):
         self.name = name
         self.texture = textures[texture]
         self.ability_code = ability_code
@@ -23,7 +22,6 @@ class Ability:
         self.cd_time = 0
         self.action_time = action_time
         self.at_time = 0
-        self.qualities = kwargs
         self.init_constant()
         self.coeff = 1.2
         self.cost = 100
@@ -47,14 +45,7 @@ class Ability:
 
     # Increase in parameters of ability
     def improve_ability(self):
-        if self.name == "0":
-            self.qualities["splashDamage"][0] = int(self.qualities["splashDamage"][0] * self.coeff)
-        elif self.name == "1":
-            self.qualities["healing"] = int(self.qualities["healing"] * self.coeff)
-        elif self.name == "2":
-            self.qualities["shield"] = int(self.qualities["shield"] * self.coeff)
-        elif self.name == "3":
-            self.cool_down -= 1
+        pass
 
     def update_ability(self):
         if self.cd_time > 0:
@@ -66,6 +57,96 @@ class Ability:
             return False
         else:
             return True
+
+    def get_infobar(self, essence):
+        pass
+
+
+class SplashDamage(Ability):
+    def __init__(self, name: str,
+                 ability_code: int,
+                 max_lvl: int,
+                 active: bool,
+                 cool_down: int,
+                 action_time: int,
+                 damage: int = 40,
+                 radius: int = 5):
+        super().__init__(name, 'SplashDamage', ability_code, max_lvl, active, cool_down, action_time)
+        self.damage = damage
+        self.radius = radius
+
+    def improve_ability(self):
+        self.damage = self.damage * self.coeff
+
+    def get_infobar(self, essence):
+        return InfoBar("Ability level = " + str(self.ability_lvl) +
+                       " Deals damage = " + str(self.damage) + ", range = " + str(self.radius) +
+                       ", cool down = " + str(self.cool_down) + ", make " + str(self.cd_time) + " moves to reapply" +
+                       " and can be improved" * int(essence.level.lvl_points > 0) * int(essence.gold >= self.cost))
+
+
+class Healing(Ability):
+    def __init__(self, name: str,
+                 ability_code: int,
+                 max_lvl: int,
+                 active: bool,
+                 cool_down: int,
+                 action_time: int,
+                 heal: int = 20):
+        super().__init__(name, 'Healing', ability_code, max_lvl, active, cool_down, action_time)
+        self.heal = heal
+
+    def improve_ability(self):
+        self.heal = self.heal * self.coeff
+
+    def get_infobar(self, essence):
+        return InfoBar("Ability level = " + str(self.ability_lvl) + " Heals you " + str(self.heal) + " health"
+                       ", cool down = " + str(self.cool_down) + ", make " + str(self.cd_time) +
+                       " moves to reapply" + " and can be improved" * int(essence.level.lvl_points > 0) *
+                       int(essence.gold >= self.cost))
+
+
+class Shield(Ability):
+    def __init__(self, name: str,
+                 ability_code: int,
+                 max_lvl: int,
+                 active: bool,
+                 cool_down: int,
+                 action_time: int,
+                 shield: int = 20):
+        super().__init__(name, 'Shield', ability_code, max_lvl, active, cool_down, action_time)
+        self.shield = shield
+
+    def improve_ability(self):
+        self.shield = self.shield * self.coeff
+
+    def get_infobar(self, essence):
+        return InfoBar("Ability level = " + str(self.ability_lvl) +
+                       " Gives you a shield that blocks damage = " + str(self.shield) +
+                       ", cool down = " + str(self.cool_down) + ", make " + str(self.cd_time) + " moves to reapply" +
+                       " and can be improved" * int(essence.level.lvl_points > 0) * int(essence.gold >= self.cost))
+
+
+class Invisibility(Ability):
+    def __init__(self, name: str,
+                 ability_code: int,
+                 max_lvl: int,
+                 active: bool,
+                 cool_down: int,
+                 action_time: int,
+                 invisible: int = 1):
+        super().__init__(name, 'Invisibility', ability_code, max_lvl, active, cool_down, action_time)
+        self.invisible = invisible
+
+    def improve_ability(self):
+        self.cool_down -= 1
+
+    def get_infobar(self, essence):
+        return InfoBar("Ability level = " + str(self.ability_lvl) +
+                       " Gives you complete invisibility for " + str(self.invisible) +
+                       " turns, cool down = " + str(self.cool_down)
+                       + ", make " + str(self.cd_time) + " moves to reapply" +
+                       " and can be improved" * int(essence.level.lvl_points > 0) * int(essence.gold >= self.cost))
 
 
 # Interface all abilities of hero
@@ -82,7 +163,6 @@ class AbilityInterface:
         self.window_height = window_height
         self.width = 4
         self.height = 1
-        self.info_name = None
 
     def render(self, screen):
         x = self.left
@@ -99,12 +179,6 @@ class AbilityInterface:
             screen.blit(abl.texture.image, (x, y))
             x += self.indent + abl.texture.size[0]
 
-        if self.info_name is not None and 0 < self.info_name[0].time:
-            self.info_name[0].render(screen)
-            self.info_name[0].time -= self.info_name[1].tick()
-        else:
-            self.info_name = None
-
     # Return ability when user clicked on ability
     def get_ability_on_click(self, pos):
         x = (pos[0] - self.left) // self.ability_size
@@ -114,37 +188,10 @@ class AbilityInterface:
             return None
         return self.abilities[x]
 
-    def show_info(self, pos, essence):
+    def get_infobar(self, pos, essence):
         ability = self.get_ability_on_click(pos)
         if ability is not None:
-            if ability.name == "0":
-                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
-                                  " Deals damage = " + str(ability.qualities["splashDamage"][0]) + ", range = " +
-                                  str(ability.qualities["splashDamage"][1]) +
-                                  ", cool down = " + str(ability.cool_down)
-                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.level.lvl_points > 0) *
-                                  int(essence.gold >= ability.cost))
-            elif ability.name == "1":
-                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
-                                  " Heals you " + str(ability.qualities["healing"]) + " health"
-                                  ", cool down = " + str(ability.cool_down) + ", make " + str(ability.cd_time) +
-                                  " moves to reapply" + " and can be improved" * int(essence.level.lvl_points > 0) *
-                                  int(essence.gold >= ability.cost))
-            elif ability.name == "2":
-                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
-                                  " Gives you a shield that blocks damage = " + str(ability.qualities["shield"]) +
-                                  ", cool down = " + str(ability.cool_down)
-                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.level.lvl_points > 0) *
-                                  int(essence.gold >= ability.cost))
-            elif ability.name == "3":
-                infoBar = InfoBar("Ability level = " + str(ability.ability_lvl) +
-                                  " Gives you complete invisibility for " + str(ability.qualities["invisibility"]) +
-                                  " turns, cool down = " + str(ability.cool_down)
-                                  + ", make " + str(ability.cd_time) + " moves to reapply" +
-                                  " and can be improved" * int(essence.level.lvl_points > 0) *
-                                  int(essence.gold >= ability.cost))
-            clock = pygame.time.Clock()
+            infoBar = ability.get_infobar(essence)
             infoBar.pos = pos
-            self.info_name = [infoBar, clock]
+            return infoBar
+        return None
