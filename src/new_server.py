@@ -18,6 +18,7 @@ class Server:
         self.ip = socket.gethostbyname(socket.gethostname())
         print(self.ip)
         self.end_session = False
+        self.bots_lvl = 1
 
     def create_all_coord(self):
         self.all_coord = []
@@ -31,27 +32,38 @@ class Server:
         new_location = random.choice(A)
         return new_location
 
+    def heroes_lvls(self):
+        lvls_sum = 0
+        heroes = 0
+        for i in self.essences:
+            if i["type"] == "hero":
+                heroes += 1
+                lvls_sum += i["level"][0]
+
+        self.bots_lvl = max(lvls_sum // max(heroes, 1), 1)
+
     def generate_new_being(self, texture):
+        self.heroes_lvls()
         info = {"name": "Bot",
-                "health": 40,
-                "damage": 5,
+                "health": min(40 + self.bots_lvl, 50),
+                "damage": 5 + self.bots_lvl,
                 "location": self.generate_location(),
                 "texture": texture,
                 "gold": 20,
                 "code": self.generate_essence_code(),
                 "live": 1,
-                "maxHealth": 40,
-                "shield": 0,
-                "maxShield": 20,
-                "exp": 20,
+                "maxHealth": min(40 + self.bots_lvl, 50),
+                "shield": max(int(self.bots_lvl > 3) * int(1.5 ** self.bots_lvl), 40),
+                "maxShield": 40,
+                "exp": 15 + 5 * self.bots_lvl,
                 "type": 'essence'}
         self.essences.append(info)
 
     def being_step(self, ind):
         x, y = self.essences[ind]["location"]
         step = []
-        for i in range(max(0, x - 3), x + 3):
-            for j in range(max(0, y - 3), y + 3):
+        for i in range(max(0, x - 3), min(x + 4, 99)):
+            for j in range(max(0, y - 3), min(y + 4, 99)):
                 st = True
                 for es in self.essences:
                     if es["location"] == (i, j):
@@ -77,7 +89,6 @@ class Server:
         for ind, i in enumerate(self.essences):
             if i["type"] == "essence":
                 self.being_step(ind)
-                print("step being")
 
     def generate_new_hero(self, texture):
         info = {"name": "Lox",
@@ -139,7 +150,6 @@ class Server:
         self.listener = int(self.recv_msg(sock).decode('utf-8'))
 
     def start(self):
-        print("Good")
         sock_producer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_producer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock_producer.bind((self.ip, 5000))
@@ -156,7 +166,6 @@ class Server:
         wlist = []
         errlist = []
         while True:
-            print(self.essences)
             if self.end_connecting is False and self.listener == len(rlist) - 2:
                 self.was_connected_all_clients(rlist[2::])
                 self.end_connecting = True
@@ -186,23 +195,26 @@ class Server:
                     wlist.append(cons)
                 elif self.listener is not None and self.end_connecting is True:
                     change = False
+                    k = True
                     try:
                         info = self.recv_msg(sock)
                         out_buffer = list(map(lambda x: eval(x.decode('utf-8')), eval(info)))
                     except:
-                        del(rlist[rlist.index(sock)])
                         out_buffer = []
                     if out_buffer != []:
+                        if out_buffer[-1] in [True, False]:
+                            del (rlist[rlist.index(sock)])
+                            k = out_buffer[-1]
+                            out_buffer = out_buffer[:-1]
                         self.essences = out_buffer
                         if self.whose_move == 0:
                             self.server_step()
-                            print("make_step")
                         for ind, s in enumerate(rlist[2::]):
                             if ind == self.whose_move:
                                 change = True
                             mes = str([self.essences, bool(ind == self.whose_move)])
                             self.send_msg(mes, s)
-                        self.whose_move = (self.whose_move + int(change)) % self.listener
+                        self.whose_move = (self.whose_move + int(change) * int(k)) % max((len(rlist) - 2), 1)
 
 
 server = Server(100, 8)

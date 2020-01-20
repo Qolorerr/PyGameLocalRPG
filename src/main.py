@@ -11,7 +11,7 @@ from hero import Hero
 from abilityInterface import Ability
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
-from menu import menu, terminate, get_data_from_configs, Button
+from menu import menu, get_data_from_configs, Button
 from death import death
 from client import Client
 
@@ -142,7 +142,7 @@ def main():
     try:
         players = int(players)
     except ValueError:
-        players = 2
+        players = 1
     print("My IP:", socket.gethostbyname(socket.gethostname()))
     client = Client(ip)
     client.nick = nick
@@ -199,6 +199,7 @@ def main():
         timer = 1.5 * 60 * 1000
     else:
         essences[get_mainHeroID()].steps = 0
+    ex = False
     while running:
         i = 0
         while i < len(essences):
@@ -209,9 +210,11 @@ def main():
         mainHeroID = get_mainHeroID()
         if mainHeroID == -1:
             break
+        if ex:
+            break
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                terminate()
+                ex = True
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F4:
                 mainHeroID = get_mainHeroID()
                 if mainHeroID != -1:
@@ -302,8 +305,10 @@ def main():
                 step = False
             else:
                 break
+    essences.append(bytes(str(step), encoding="utf-8"))
     client.send_msg(str(list(map(bytes, essences))))
-    death(screen, resolution)
-    pygame.quit()
     client.disconnect()
+    death(screen, resolution, "die")
+    pygame.quit()
+
 main()

@@ -3,11 +3,6 @@ import sys
 from general import textures, font_name_B
 
 
-def terminate():
-    pygame.quit()
-    sys.exit()
-
-
 class Button:
     def __init__(self, rect: tuple,
                  color: tuple,
