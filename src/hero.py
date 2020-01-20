@@ -41,7 +41,10 @@ class Hero(Essence):
             return self.ESSENSE_ALIVE
         if self.steps > 0 or type_of_attack == self.RESPONSE_TO_ATTACK:
             res = super().attack(other_essence, type_of_attack)
-            self.do_step()
+            if (abs(other_essence.location[0] - self.location[0]) + abs(
+                    other_essence.location[1] - self.location[1])) <= \
+                    self.attack_range and self.live == self.ESSENSE_ALIVE:
+                self.do_step()
             return res
 
     def give_reward(self, other_essence):
