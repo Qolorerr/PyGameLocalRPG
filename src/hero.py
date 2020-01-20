@@ -3,6 +3,7 @@ import pygame
 from general import textures, essences, camera
 from essence import Essence
 from level import Level
+from abilityInterface import SplashDamage, Healing, Shield, Invisibility
 
 
 class Hero(Essence):
@@ -64,36 +65,39 @@ class Hero(Essence):
         if ability.at_time > 0:
             return True
         self.do_step()
-        if 'invisibility' in ability.qualities:
+        if type(ability) == Invisibility:
             ability.cd_time = ability.cool_down
             self.invisible = 1
-        if 'splashDamage' in ability.qualities:
+        elif type(ability) == SplashDamage:
             ability.cd_time = ability.cool_down
-            dmg, rad = ability.qualities['splashDamage']
-            del_list = []
-            for ind, i in enumerate(essences):
+            ind = 0
+            while ind < len(essences):
+                i = essences[ind]
                 if i == self:
+                    ind += 1
                     continue
-                if abs(i.location[0] - self.location[0]) + abs(i.location[1] - self.location[1]) <= rad:
-                    i.health -= dmg
+                if abs(i.location[0] - self.location[0]) + abs(i.location[1] - self.location[1]) <= ability.radius:
+                    i.health -= ability.damage
                     if i.alive() == i.ESSENSE_DIE:
                         i.give_reward(self)
                         del(essences[ind])
-            for i in range(-rad, rad + 1):
-                for j in range(-rad, rad + 1):
-                    if abs(i) + abs(j) > rad:
+                        continue
+                ind += 1
+            for i in range(-ability.radius, ability.radius + 1):
+                for j in range(-ability.radius, ability.radius + 1):
+                    if abs(i) + abs(j) > ability.radius:
                         continue
                     x = self.location[0] + i
                     y = self.location[1] + j
                     if 0 <= x <= map.width - 1 and 0 <= y <= map.height - 1:
                         map.board[y][x][1] = True
-        if 'healing' in ability.qualities:
+        elif type(ability) == Healing:
             ability.cd_time = ability.cool_down
-            self.health += ability.qualities['healing']
+            self.health += ability.heal
             self.health = min(self.health, self.maxHealth)
-        if 'shield' in ability.qualities:
+        elif type(ability) == Shield:
             ability.cd_time = ability.cool_down
-            self.shield = min(ability.qualities['shield'], self.maxHealth)
+            self.shield = min(ability.shield, self.maxHealth)
             self.maxShield = self.shield
 
     def get_event(self, keydown_unicode, gameMap):

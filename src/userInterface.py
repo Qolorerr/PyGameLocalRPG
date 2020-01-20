@@ -6,13 +6,81 @@ from being import Being
 from infoBar import InfoBar
 
 
+class CircleIndicator:
+    def __init__(self, essence,
+                 color,
+                 centre_coord,
+                 arc_coord):
+        self.essence = essence
+        self.color = color
+        self.scoreFont = pygame.font.Font(font_name_B, 20, bold=True)
+        self.centre_coord = centre_coord
+        self.arc_coord = arc_coord
+        self.middle_value = ''
+        self.current_value = 0
+        self.max_value = 1
+
+    def update(self, current_value: int,
+               max_value: int,
+               middle_value = ''):
+        if middle_value == '':
+            self.middle_value = current_value
+        else:
+            self.middle_value = middle_value
+        self.current_value = current_value
+        self.max_value = max_value
+
+    def render(self, screen, radius: int = 50):
+        pygame.draw.circle(screen, self.color, self.centre_coord, radius, 1)
+        text = self.scoreFont.render(str(self.middle_value), 1, (255, 255, 255))
+        screen.blit(text, (self.centre_coord[0] - text.get_width() // 2, self.centre_coord[1] - text.get_height() // 2))
+        coeff = (self.current_value / self.max_value) * 2 * pi - pi / 2
+        pygame.draw.arc(screen, self.color, self.arc_coord, -coeff, pi / 2, 5)
+
+    def get_infobar(self):
+        pass
+
+
+class Health(CircleIndicator):
+
+    def get_infobar(self):
+        return InfoBar("Name: health, MAX Health = " + str(self.essence.maxHealth) + ", now health = " +
+                       str(self.essence.health) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+
+
+class Shield(CircleIndicator):
+    def get_infobar(self):
+        return InfoBar("Name: shield, MAX Shield = " + str(self.essence.maxShield) + ", now shield = " +
+                       str(self.essence.shield) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+
+
+class Steps(CircleIndicator):
+    def get_infobar(self):
+        return InfoBar("Name: steps, MAX Steps = " + str(self.essence.move_distance) + ", now steps = " +
+                       str(self.essence.steps) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+
+
+class Level(CircleIndicator):
+    def get_infobar(self):
+        return InfoBar("Name: level, Need experience for upgrade = " +
+                       str(self.essence.level.max_exp - self.essence.level.exp))
+
+
+class Gold(CircleIndicator):
+    def get_infobar(self):
+        return InfoBar("Name: gold, MAX Gold = " + str(self.essence.maxGold) + ", Gold = " + str(self.essence.gold) +
+                       " and can be improved" * int(self.essence.level.lvl_points > 0))
+
+
 class UserInterface:
     def __init__(self, width: int,
                  height: int,
-                 essence: int):
+                 essence: int,
+                 ability_interface):
         self.width = width
         self.height = height
         self.essence = essences[essence]
+        self.ability_interface = ability_interface
         self.upTexture = textures['Timer']
         self.upIndent = 5
         self.timeFont = pygame.font.Font(font_name_R, 20)
@@ -27,13 +95,14 @@ class UserInterface:
         self.components_lvl = {"health": 1,
                                "steps": 1,
                                "gold": 1}
-
-    def circle_show(self, screen, centreCoords, color, midVal, currentVal, maxVal, arcCoords):
-        pygame.draw.circle(screen, color, centreCoords, 50, 1)
-        text = self.scoreFont.render(str(midVal), 1, (255, 255, 255))
-        screen.blit(text, (centreCoords[0] - text.get_width() // 2, centreCoords[1] - text.get_height() // 2))
-        coeff = (currentVal / maxVal) * 2 * pi - pi / 2
-        pygame.draw.arc(screen, color, arcCoords, -coeff, pi / 2, 5)
+        self.health = Health(self.essence, (219, 77, 66), (100, self.height - 100), (50, self.height - 150, 100, 100))
+        self.shield = Shield(self.essence, (81, 119, 179), (225, self.height - 100), (175, self.height - 150, 100, 100))
+        self.steps = Steps(self.essence, (53, 146, 196), (self.width - 350, self.height - 100),
+                           (self.width - 400, self.height - 150, 100, 100))
+        self.level = Level(self.essence, (255, 255, 255), (self.width - 100, self.height - 100),
+                           (self.width - 150, self.height - 150, 100, 100))
+        self.gold = Gold(self.essence, (255, 215, 0), (self.width - 225, self.height - 100),
+                         (self.width - 275, self.height - 150, 100, 100))
 
     def render(self, screen, timer):
         # Show upper part of GUI
@@ -57,21 +126,22 @@ class UserInterface:
         screen.blit(text, (self.width // 2 + 45, self.upIndent))
 
         # Show health
-        self.circle_show(screen, (100, self.height - 100), (219, 77, 66), self.essence.health, self.essence.health,
-                         self.essence.maxHealth, (50, self.height - 150, 100, 100))
+        self.health.update(self.essence.health, self.essence.maxHealth)
+        self.health.render(screen)
         # Show shield
-        self.circle_show(screen, (225, self.height - 100), (81, 119, 179), self.essence.shield, self.essence.shield,
-                         self.essence.maxShield, (175, self.height - 150, 100, 100))
+        self.shield.update(self.essence.shield, self.essence.maxShield)
+        self.shield.render(screen)
         # Show count of move points
-        self.circle_show(screen, (self.width - 350, self.height - 100), (53, 146, 196), self.essence.steps,
-                         self.essence.steps, self.essence.move_distance, (self.width - 400, self.height - 150, 100, 100))
+        self.steps.update(self.essence.steps, self.essence.move_distance)
+        self.steps.render(screen)
         # Show exp and level
-        self.circle_show(screen, (self.width - 100, self.height - 100), (255, 255, 255), self.essence.level.get(),
-                         self.essence.level.exp, self.essence.level.max_exp,
-                         (self.width - 150, self.height - 150, 100, 100))
+        self.level.update(self.essence.level.exp, self.essence.level.max_exp, self.essence.level.get())
+        self.level.render(screen)
         # Show gold
-        self.circle_show(screen, (self.width - 225, self.height - 100), (255, 215, 0), self.essence.gold,
-                         self.essence.gold, self.essence.maxGold, (self.width - 275, self.height - 150, 100, 100))
+        self.gold.update(self.essence.gold, self.essence.maxGold)
+        self.gold.render(screen)
+        # Show ability interface
+        self.ability_interface.render(screen)
         if self.info_name is not None and 0 < self.info_name[0].time:
             self.info_name[0].render(screen)
             self.info_name[0].time -= self.info_name[1].tick()
@@ -86,23 +156,24 @@ class UserInterface:
         return False
 
     def show_info(self, pos):
+        infoBar = self.ability_interface.get_infobar(pos, self.essence)
+        if infoBar is not None:
+            clock = pygame.time.Clock()
+            self.info_name = [infoBar, clock]
+            return
         name = self.get_user_interface_cell(pos)
         if name is not False:
+            infoBar = InfoBar('')
             if name == "health":
-                infoBar = InfoBar("Name: " + name + ", MAX Health = " + str(self.essence.maxHealth) + ", now health = " +
-                                  str(self.essence.health) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+                infoBar = self.health.get_infobar()
             elif name == "shield":
-                infoBar = InfoBar("Name: " + name + ", MAX Shield = " + str(self.essence.maxShield) + ", now shield = " +
-                                  str(self.essence.shield) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+                infoBar = self.shield.get_infobar()
             elif name == "steps":
-                infoBar = InfoBar("Name: " + name + ", MAX Steps = " + str(self.essence.move_distance) + ", now steps = " +
-                                  str(self.essence.steps) + " and can be improved" * int(self.essence.level.lvl_points > 0))
+                infoBar = self.steps.get_infobar()
             elif name == "level":
-                infoBar = InfoBar("Name: " + name + ", Need experience for upgrade = " +
-                                  str(self.essence.level.max_exp - self.essence.level.exp))
+                infoBar = self.level.get_infobar()
             elif name == "gold":
-                infoBar = InfoBar("Name: " + name + ", MAX Gold = " + str(self.essence.maxGold) + ", Gold = " + str(self.essence.gold) +
-                                  " and can be improved" * int(self.essence.level.lvl_points > 0))
+                infoBar = self.gold.get_infobar()
             clock = pygame.time.Clock()
             infoBar.pos = pos
             self.info_name = [infoBar, clock]

@@ -8,7 +8,7 @@ from subprocess import Popen
 from general import essences, camera, font_name_B, textures
 from map import Map
 from hero import Hero
-from abilityInterface import Ability
+from abilityInterface import SplashDamage, Healing, Shield, Invisibility
 from abilityInterface import AbilityInterface
 from userInterface import UserInterface
 from menu import menu, get_data_from_configs, Button
@@ -154,12 +154,6 @@ def main():
     print('Client started')
     running = True
     gameMap = Map(100, 100)
-    abilities = []
-    abilities.append(Ability('0', 'SplashDamage', 1, 8, False, 2, 1, splashDamage=[40, 5]))
-    abilities.append(Ability('1', 'Healing', 2, 8, False, 3, 1, healing=20))
-    abilities.append(Ability('2', 'Shield', 3, 8, False, 12, 3, shield=20))
-    abilities.append(Ability('3', 'Invisibility', 4, 8, False, 20, 2, invisibility=1))
-    abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (0, 0, 0))
     infoObj = pygame.display.Info()
     mainHeroID = get_mainHeroID()
     essences[mainHeroID].name = nick
@@ -169,7 +163,13 @@ def main():
               (infoObj.current_h - (gameMap.cell_size + gameMap.indent)) // 2
     camera.append(cameraX)
     camera.append(cameraY)
-    userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID)
+    abilities = []
+    abilities.append(SplashDamage('0', 1, 8, False, 2, 1))
+    abilities.append(Healing('1', 2, 8, False, 3, 1))
+    abilities.append(Shield('2', 3, 8, False, 12, 3))
+    abilities.append(Invisibility('3', 4, 8, False, 20, 2))
+    abilityInterface = AbilityInterface(abilities, resolution[0], resolution[1], (0, 0, 0))
+    userinterface = UserInterface(infoObj.current_w, infoObj.current_h, mainHeroID, abilityInterface)
     rect = (resolution[0] // 9 * 8 - 5, 5, resolution[0] // 9, resolution[1] // 15)
     end_turn_btn = Button(rect, (0, 0, 0), (200, 200, 200), "END TURN")
     rect = (resolution[0] // 4, resolution[1] // 18 * 17, resolution[0] // 10, resolution[1] // 18)
@@ -240,10 +240,9 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 3:
                         userinterface.show_info(event.pos)
-                        abilityInterface.show_info(event.pos, essences[mainHeroID])
                     elif event.button == 1:
                         if essences[mainHeroID].upgrade_mode:
-                            ability = abilityInterface.get_ability_on_click(event.pos)
+                            ability = userinterface.ability_interface.get_ability_on_click(event.pos)
                             component = userinterface.get_user_interface_cell(event.pos)
                             if ability is not None:
                                 point = ability.lvl_up(mainHeroID)
@@ -261,7 +260,7 @@ def main():
                             mainHeroID = get_mainHeroID()
                             if mainHeroID == -1:
                                 continue
-                            essences[mainHeroID].use_ability(abilityInterface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
+                            essences[mainHeroID].use_ability(userinterface.ability_interface.get_ability_on_click(pygame.mouse.get_pos()), gameMap)
                 end_turn = end_turn_btn.event_handle(event)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_p or end_turn:
                     timer = 0
@@ -277,7 +276,6 @@ def main():
             essences[mainHeroID].render(screen, gameMap)
             if essences[mainHeroID].attack_mode:
                 essences[mainHeroID].render_can_attack(screen, gameMap)
-            abilityInterface.render(screen)
             end_turn_btn.render(screen, (200, 200, 200))
             upgrade_btn.render(screen, (200, 200, 200))
             attack_btn.render(screen, (200, 200, 200))
@@ -293,7 +291,7 @@ def main():
                 if get_mainHeroID() == -1:
                     break
                 client.alive = False
-                essences[get_mainHeroID()].step_update(abilityInterface)
+                essences[get_mainHeroID()].step_update(userinterface.ability_interface)
                 if sounds:
                     your_turn.play()
         if step is True and (get_mainHeroID() == -1 or essences[get_mainHeroID()].steps == 0 or timer == 0):
