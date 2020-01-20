@@ -135,7 +135,7 @@ def main():
         ip = socket.gethostbyname(socket.gethostname())
         print(data, ip)
         os.getcwd()
-        Popen("python new_server.py")
+        Popen("new_server.exe")
         print('Server started')
     else:
         host, nick, ip = data
