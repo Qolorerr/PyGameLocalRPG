@@ -53,7 +53,7 @@ class Server:
                 "code": self.generate_essence_code(),
                 "live": 1,
                 "maxHealth": min(40 + self.bots_lvl, 50),
-                "shield": max(int(self.bots_lvl > 3) * int(1.5 ** self.bots_lvl), 40),
+                "shield": min(int(self.bots_lvl > 3) * int(1.5 ** self.bots_lvl), 40),
                 "maxShield": 40,
                 "exp": 15 + 5 * self.bots_lvl,
                 "type": 'essence'}
